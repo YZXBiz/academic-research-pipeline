@@ -31,5 +31,9 @@ instructions: |
   - red_flags: List of specific concerns (empty if none)
 model_settings:
   max_tokens: 128000
+  extra_body:
+    thinking:
+      type: enabled
+      reasoning_effort: max
 retries: 2
 output_retries: 2

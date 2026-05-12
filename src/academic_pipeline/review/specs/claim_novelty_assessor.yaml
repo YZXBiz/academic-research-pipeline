@@ -60,5 +60,9 @@ instructions: |
   nearest_prior_works exactly as provided.
 model_settings:
   max_tokens: 16000
+  extra_body:
+    thinking:
+      type: enabled
+      reasoning_effort: max
 retries: 2
 output_retries: 2

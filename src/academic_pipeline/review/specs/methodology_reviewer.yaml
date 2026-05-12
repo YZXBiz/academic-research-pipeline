@@ -263,5 +263,9 @@ instructions: |
   Do not introduce new arguments or content. Only verify and critique.
 model_settings:
   max_tokens: 128000
+  extra_body:
+    thinking:
+      type: enabled
+      reasoning_effort: max
 retries: 2
 output_retries: 2
