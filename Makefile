@@ -1,5 +1,11 @@
 .DEFAULT_GOAL := help
 
+# Put src/ on PYTHONPATH for every target. Bypasses hatchling's editable
+# install which is broken under Python 3.13 (underscore-prefixed .pth files
+# are silently skipped by site.py for security). This works regardless of
+# uv / hatchling / Python version.
+export PYTHONPATH := $(CURDIR)/src$(if $(PYTHONPATH),:$(PYTHONPATH))
+
 help: ## Show this help message
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$|^##@' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; /^##@/ {printf "\n\033[1m%s\033[0m\n", substr($$0, 5); next} {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
