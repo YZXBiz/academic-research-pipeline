@@ -41,16 +41,13 @@ class WatchdogConfig:
     """Immutable configuration for ``run_watchdog``."""
 
     thread_id: str
-    # 75s was the original default and proved much too aggressive: legitimate
-    # research nodes (SourceVerificationNode loops over Semantic Scholar +
-    # CrossRef + Retraction Watch for every bibliography source, BibliographyNode
-    # batches Exa neural searches) silently spend 60-120s between events.jsonl
-    # writes. False-positive kills were observed in run-0504-1802_ec44 at
-    # age_s=76.6. The watchdog's purpose is to catch HOURS-long LLM proxy SSE
-    # wedges, not minutes-long-but-progressing nodes. 600s (10 min) gives a
-    # comfortable headroom over the slowest known node while still recovering
-    # the multi-hour wedges the watchdog exists for.
-    max_idle_s: int = 600
+    # 75s was the original default and proved much too aggressive. 600s held
+    # until run-0511-2107, where integrity_verification_agent's combined
+    # Exa+claim-verification reasoning legitimately exceeded the coupled 480s
+    # agent.run cap (see trace_logger._AGENT_RUN_TIMEOUT_S). Both bumped in
+    # tandem to keep agent_cap < watchdog_idle: agent=900s, watchdog=1200s.
+    # The watchdog's purpose remains catching MULTI-HOUR wedges, not minutes.
+    max_idle_s: int = 1200
     poll_interval_s: int = 30
     output_dir: Path = field(default_factory=lambda: Path("output"))
     persistence_dir: Path = field(default_factory=lambda: Path(".pipeline_runs"))

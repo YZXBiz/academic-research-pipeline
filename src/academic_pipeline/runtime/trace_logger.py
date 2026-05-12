@@ -18,13 +18,15 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _MAX_TOOL_RESULT_CHARS = 3000
-_AGENT_RUN_TIMEOUT_S = 480.0
-# 8-minute wall-clock cap per agent.run. Must be LESS than recovery/watchdog.py
-# max_idle_s (600s) so wedged proxy-SSE calls raise AgentTimeoutError → the
-# snapshot is recorded as 'error' → auto-resume picks up cleanly. With the old
-# 900s cap, the watchdog killed the process group at 600s instead, wasting
-# 5 extra minutes per cycle and corrupting in-flight snapshots. Lowered after
-# run-0504-1802_ec44 post-mortem (5 wedge-resume cycles observed).
+_AGENT_RUN_TIMEOUT_S = 900.0
+# 15-minute wall-clock cap per agent.run. Must be LESS than recovery/watchdog.py
+# max_idle_s (1200s) so wedged calls raise AgentTimeoutError → the snapshot is
+# recorded as 'error' → auto-resume picks up cleanly.
+# Bumped from 480s (the proxied-Anthropic-SSE-wedge-tuned value) after
+# run-0511-2107 post-mortem: integrity_verification_agent legitimately needs
+# 500-700s on DeepSeek-v4-pro for multi-tool Exa+claim-verification work. The
+# 1200s watchdog cap retains room for 3-strikes escalation to fire on truly
+# wedged LLM proxy-class hangs (multi-hour).
 
 
 def _is_json(text: str) -> bool:
