@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: integrity_verification_agent
 description: Verifies academic integrity — checks claims, plagiarism indicators, and AI-generated content patterns.
 instructions: |

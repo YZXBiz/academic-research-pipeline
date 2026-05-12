@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: editor_in_chief_agent
 description: Reviews reports with Q1 journal rigor — scores originality, methodology, evidence, coherence, and writing quality.
 instructions: |

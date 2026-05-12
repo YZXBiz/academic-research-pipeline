@@ -10,21 +10,35 @@ Autonomous academic paper pipeline. Give it a topic, get a journal-ready paper.
 
 v2.3.0 — Dataset discovery (Exa search), AutoGluon full API (tabular + timeseries + multimodal), email alerts, experiment improvement loop, VLM figure review, multi-seed replication, plan-alignment verification.
 
-## Model + Proxy (2026-05-11 cutover)
+## Model + API (2026-05-11 cutover)
 
-All 52 agent YAMLs now use `model: openai:deepseek-v4-pro-reasoner-search` and route through the
-dpapi.cn OpenAI-compatible proxy. The Anthropic SDK does NOT work against this proxy — there is
-no Anthropic provider in this project anymore.
+All 52 agent YAMLs use `model: openai:deepseek-v4-pro` and route through DeepSeek's
+**official** OpenAI-compatible API at `api.deepseek.com/v1`. There is no Anthropic provider
+in this project anymore.
 
 Required env (see `.env` / `.env.example`):
 ```
-OPENAI_API_KEY=sk-...          # dpapi.cn token, NOT an openai.com key
-OPENAI_BASE_URL=https://dpapi.cn/v1
+OPENAI_API_KEY=sk-...                       # DeepSeek key from platform.deepseek.com
+OPENAI_BASE_URL=https://api.deepseek.com/v1
 ```
 
-DeepSeek's `-reasoner-search` does internal reasoning + web search natively — there is no
-`anthropic_effort` / `Thinking: effort:` knob and none of the YAML specs carry one. Don't add
-one back.
+Thinking mode is **on by default** (DeepSeek's `thinking.type` defaults to `enabled`, default
+`reasoning_effort: high`). To push specific agents to max reasoning, add to their YAML:
+```yaml
+model_settings:
+  extra_body:
+    thinking:
+      type: enabled
+      reasoning_effort: max
+```
+
+Context window: 1,048,576 tokens (1M) for both `deepseek-v4-pro` and `deepseek-v4-flash`. No
+proxy clamping. Web search is NOT a built-in model feature — agents that need web access call
+Exa tools (`web_search_exa`) instead.
+
+The prior dpapi.cn relay proxy (and the `-reasoner-search` model alias it exposed) has been
+retired — never reintroduce it; the official API is cheaper, has the full 1M window, and
+supports DeepSeek's native `thinking` param.
 
 ## Behavioral Guidelines
 
@@ -157,7 +171,7 @@ ExperimentClassifier → ExperimentDesigner → ConfigWriter → DagsterRun → 
 ### Agents
 - Defined via YAML specs co-located with each subgraph: `<sub>/specs/*.yaml`
 - Loaded with `Agent.from_file()` in `<sub>/agents.py` registry files
-- All specs start with `model: openai:deepseek-v4-pro-reasoner-search` (post-2026-05-11). No `anthropic_effort` / `Thinking: effort:` fields — DeepSeek reasoning + search are implicit
+- All specs start with `model: openai:deepseek-v4-pro` (post-2026-05-11). No `anthropic_effort` / `Thinking: effort:` fields — DeepSeek thinking mode is enabled by default; opt agents into `reasoning_effort: max` via `extra_body.thinking` only when explicitly needed
 - All structured agents wrapped with `PromptedOutput()`
 
 ### Tools

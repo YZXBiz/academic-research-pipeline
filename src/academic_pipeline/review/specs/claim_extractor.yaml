@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: claim_extractor_agent
 description: Extracts atomic contribution claims from a finished manuscript for per-claim novelty assessment.
 instructions: |

@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: methodology_reviewer_agent
 description: Peer Reviewer 1 focusing on research design rigor, data collection, analysis methods, and reproducibility.
 instructions: |

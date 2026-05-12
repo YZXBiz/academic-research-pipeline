@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: formatter_agent
 description: Converts final reviewed papers into requested output formats with journal-specific formatting and cover letter generation.
 instructions: |

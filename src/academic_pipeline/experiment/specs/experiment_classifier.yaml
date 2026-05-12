@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: experiment_classifier
 description: >
   Decides whether a research topic requires computational experiments

@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: visualization_agent
 description: >
   Curates the paper's figure inventory from the PNGs already produced by

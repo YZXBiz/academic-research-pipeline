@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: meta_analysis_agent
 description: Designs and executes meta-analyses with effect size computation, heterogeneity assessment, and GRADE certainty ratings.
 instructions: |

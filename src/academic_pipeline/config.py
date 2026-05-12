@@ -80,8 +80,8 @@ class PipelineConfig(BaseSettings):
     openai_base_url: str = ""
     exa_api_key: SecretStr = SecretStr("")
     s2_api_key: SecretStr = SecretStr("")
-    model_name: str = "deepseek-v4-pro-reasoner-search"
-    independent_verifier_model: str = "openai:deepseek-v4-pro-reasoner-search"
+    model_name: str = "deepseek-v4-pro"
+    independent_verifier_model: str = "openai:deepseek-v4-pro"
 
     # Temperatures
     temperature_research: float = Field(default=0.3, ge=0.0, le=1.0)
@@ -100,7 +100,7 @@ class PipelineConfig(BaseSettings):
     max_integrity_fix_loops: int = Field(default=3, ge=1)
     # Per-node evaluator-optimizer
     evaluator_models: list[str] = Field(
-        default=["openai:deepseek-v4-pro-reasoner-search"],
+        default=["openai:deepseek-v4-pro"],
     )
     max_node_iterations: int = Field(default=2, ge=1)
     node_quality_threshold: float = Field(default=7.0, ge=0.0, le=10.0)

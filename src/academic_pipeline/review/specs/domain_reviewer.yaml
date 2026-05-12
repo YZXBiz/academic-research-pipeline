@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: domain_reviewer_agent
 description: Peer Reviewer 2 focusing on domain knowledge depth, literature coverage, theoretical framework, and field contribution.
 instructions: |

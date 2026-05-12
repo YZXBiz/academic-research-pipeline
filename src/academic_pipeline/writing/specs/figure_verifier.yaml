@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: figure_verifier_agent
 description: Verifies figure and table quality using vision capabilities. Checks data accuracy, APA compliance, and visual clarity.
 instructions: |

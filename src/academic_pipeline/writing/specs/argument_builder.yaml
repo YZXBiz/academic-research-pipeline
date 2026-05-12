@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: argument_builder_agent
 description: Constructs the paper's argumentative backbone with thesis, sub-arguments, CER chains, and counter-argument strategies.
 instructions: |

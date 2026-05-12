@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: risk_of_bias_agent
 description: Assesses risk of bias in included studies using RoB 2 for RCTs and ROBINS-I for non-randomized studies.
 instructions: |

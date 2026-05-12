@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: design_scorer
 description: >
   Scores a single DesignAlternative on a structured 4-dimension rubric and

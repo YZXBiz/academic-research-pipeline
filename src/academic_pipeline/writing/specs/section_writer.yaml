@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: section_writer_agent
 description: Writes a single paper section from a SectionSpec, producing a typed Section output.
 instructions: |

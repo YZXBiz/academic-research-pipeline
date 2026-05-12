@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: eic_agent
 description: Editor-in-Chief perspective reviewer assessing overall quality, originality, significance, and journal fit.
 instructions: |

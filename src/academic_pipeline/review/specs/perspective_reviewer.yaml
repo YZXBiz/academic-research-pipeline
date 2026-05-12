@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: perspective_reviewer_agent
 description: Peer Reviewer 3 providing cross-disciplinary perspectives, assumption audits, and practical impact assessments.
 instructions: |

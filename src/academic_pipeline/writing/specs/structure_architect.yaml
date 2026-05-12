@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: structure_architect_agent
 description: Selects optimal paper structure, designs section-by-section outlines, allocates word counts, and maps evidence to sections.
 instructions: |

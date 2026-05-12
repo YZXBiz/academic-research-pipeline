@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: numerical_claims_auditor_agent
 description: |
   Audits a manuscript's numerical claims against the Spec 1 trace store.

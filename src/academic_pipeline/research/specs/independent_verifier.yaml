@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: independent_verifier_agent
 description: Independent second-pass verification of research claims and citations with maximum thinking effort.
 instructions: |

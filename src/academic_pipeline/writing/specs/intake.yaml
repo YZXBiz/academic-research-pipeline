@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: intake_agent
 description: Conducts structured configuration interview to establish paper parameters and detect research pipeline handoffs.
 instructions: |

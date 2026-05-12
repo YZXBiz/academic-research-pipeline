@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: applied_practitioner_reviewer_agent
 description: |
   Persona-anchored reviewer (thorough × applied_practitioner × adjacent_field).

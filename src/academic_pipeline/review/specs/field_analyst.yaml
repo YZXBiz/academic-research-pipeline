@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: field_analyst_agent
 description: Analyzes a paper's disciplinary positioning and dynamically generates reviewer configuration cards for the review team.
 instructions: |

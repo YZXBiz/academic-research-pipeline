@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: senior_gatekeeper_reviewer_agent
 description: |
   Persona-anchored reviewer (thorough × skeptical_gatekeeper × deep_in_field).

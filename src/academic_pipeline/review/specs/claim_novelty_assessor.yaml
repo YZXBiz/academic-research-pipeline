@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: claim_novelty_assessor_agent
 description: Assesses one contribution claim against retrieved Semantic Scholar prior works and returns a per-claim verdict.
 instructions: |

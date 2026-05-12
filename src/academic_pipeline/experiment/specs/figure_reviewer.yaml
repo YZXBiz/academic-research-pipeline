@@ -1,4 +1,4 @@
-model: openai:deepseek-v4-pro-reasoner-search
+model: openai:deepseek-v4-pro
 name: figure_reviewer
 description: >
   Reviews generated experiment figures for publication quality using
