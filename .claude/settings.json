@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "deny": ["EnterPlanMode"],
+    "allow": [
+      "Read", "Write", "Edit",
+      "Bash(pytest *)", "Bash(uv *)",
+      "Bash(ruff *)", "Bash(npx basedpyright*)", "Bash(pyright *)",
+      "Bash(make *)",
+      "Bash(python tools/*)", "Bash(python -m academic_pipeline*)",
+      "Bash(git add *)", "Bash(git commit *)",
+      "Bash(git diff *)", "Bash(git log *)",
+      "Bash(git status*)", "Bash(git branch *)",
+      "Bash(git checkout *)", "Bash(git merge *)",
+      "Bash(git push *)", "Bash(git pull *)",
+      "Bash(git fetch *)", "Bash(git stash *)",
+      "Bash(git tag *)", "Bash(gh pr *)"
+    ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'OK'"
+          }
+        ],
+        "description": "Acknowledge prompt submission"
+      }
+    ]
+  }
+}

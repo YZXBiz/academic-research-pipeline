@@ -1,0 +1,17 @@
+{
+  "include": ["src/academic_pipeline"],
+  "exclude": ["**/__pycache__", ".venv", "tests"],
+  "venvPath": ".",
+  "venv": ".venv",
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "standard",
+  "reportMissingTypeStubs": false,
+  "reportUnknownMemberType": false,
+  "reportUnknownArgumentType": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownParameterType": false,
+  "reportAny": false,
+  "reportExplicitAny": false,
+  "reportImplicitStringConcatenation": false,
+  "reportUnusedParameter": false
+}

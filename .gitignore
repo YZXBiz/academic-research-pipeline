@@ -1,0 +1,89 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+
+# Secrets
+.env
+.logfire/
+
+# Databases
+*.db
+
+# Test / Coverage
+.pytest_cache/
+.hypothesis/
+.coverage
+htmlcov/
+
+# Linters / Type checkers
+.ruff_cache/
+.mypy_cache/
+.pyright/
+
+# LangGraph
+.langgraph/
+.langgraph_api/
+
+# Claude Code
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+.claude/worktrees/
+.claude/ralph-loop.local.md
+.mcp.json
+docs/superpowers/
+docs/user/
+
+# Ralph loop runtime artifacts (state file lives in .claude/, runtime dirs here)
+.ralph/docs/
+.ralph/logs/
+
+# Skill Seekers cache
+.skillseeker-cache/
+
+# IDE
+.cursor/
+.idea/
+.vscode/
+.obsidian/
+*.swp
+*.swo
+
+# Generated output
+output/
+
+# MkDocs build output
+site/
+
+# Playwright / browser automation
+.playwright-mcp/
+
+# OS
+.DS_Store
+Thumbs.db
+.pipeline_runs/
+logs/
+pipeline_run.log
+experiment_debug/
+workspace/
+
+# Docker observability stack
+grafana-data/
+jaeger-badger-data/
+
+# Pipeline SQLite databases
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+.gstack/
+.superpowers/

@@ -1,0 +1,477 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1900" width="1100" height="1900">
+  <style>
+    text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+    .title { font-size: 28px; font-weight: 700; fill: #111827; }
+    .subtitle { font-size: 15px; fill: #6b7280; }
+    .lane-title { font-size: 16px; font-weight: 700; fill: #4b5563; letter-spacing: 1.5px; }
+    .lane-meta { font-size: 12px; fill: #9ca3af; letter-spacing: 0.5px; }
+    .node-label { font-size: 14px; font-weight: 600; fill: #111827; }
+    .node-role { font-size: 10px; font-weight: 600; fill: #6b7280; letter-spacing: 0.5px; }
+    .node-badge { font-size: 11px; fill: #2563eb; }
+    .node-flag { font-size: 10px; fill: #7c3aed; font-style: italic; }
+    .arrow-label { font-size: 11px; fill: #6b7280; }
+    .count { font-size: 12px; fill: #9ca3af; }
+    .legend-text { font-size: 13px; fill: #6b7280; }
+    .footer-strong { font-size: 13px; fill: #4b5563; font-weight: 600; }
+  </style>
+  <defs>
+    <marker id="a-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#7c3aed"/></marker>
+    <marker id="a-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#059669"/></marker>
+    <marker id="a-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#2563eb"/></marker>
+    <marker id="a-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#ea580c"/></marker>
+    <marker id="a-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#9ca3af"/></marker>
+    <marker id="a-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#dc2626"/></marker>
+    <filter id="sh"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#0000000a"/></filter>
+  </defs>
+  <rect width="1100" height="1900" fill="#ffffff"/>
+
+  <!-- ===== TITLE ===== -->
+  <text x="550" y="35" class="title" text-anchor="middle">Academic Research Pipeline v2.5</text>
+  <text x="550" y="55" class="subtitle" text-anchor="middle">Fully Autonomous End-to-End Paper Generation  ·  56 nodes  ·  52 agent specs  ·  6 subgraphs</text>
+  <text x="550" y="73" class="count" text-anchor="middle">Dashed boxes = flag-gated (default off, part of SCI Improvements Layer 2026-05-04)</text>
+
+  <!-- ============================================================= -->
+  <!-- ORCHESTRATOR + INPUT LANE (y=85-275)                            -->
+  <!-- ============================================================= -->
+  <rect x="20" y="85" width="1060" height="190" rx="12" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="35" y="107" class="lane-title">PIPELINE ORCHESTRATOR  ·  pipeline/nodes.py</text>
+  <text x="1065" y="107" class="lane-meta" text-anchor="end">14 NODES · 0 AGENTS · drives subgraphs in sequence</text>
+
+  <!-- User input -->
+  <rect x="40" y="120" width="170" height="50" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="125" y="136" class="node-role" text-anchor="middle">USER INPUT</text>
+  <text x="125" y="153" class="node-label" text-anchor="middle">Research Topic</text>
+
+  <!-- Orchestrator nodes row 1 (7 nodes) -->
+  <rect x="240" y="120" width="115" height="50" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="297" y="136" class="node-role" text-anchor="middle">ORCHESTRATOR</text>
+  <text x="297" y="153" class="node-label" text-anchor="middle">Intake</text>
+
+  <rect x="365" y="120" width="115" height="50" rx="8" fill="#fef3c7" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="4,3" filter="url(#sh)"/>
+  <text x="422" y="136" class="node-role" text-anchor="middle">SPEC 3 (FLAG)</text>
+  <text x="422" y="153" class="node-label" text-anchor="middle">NoveltyGate</text>
+
+  <rect x="490" y="120" width="115" height="50" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="547" y="136" class="node-role" text-anchor="middle">ORCHESTRATOR</text>
+  <text x="547" y="153" class="node-label" text-anchor="middle">ResearchPhase</text>
+
+  <rect x="615" y="120" width="115" height="50" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="672" y="136" class="node-role" text-anchor="middle">CLASSIFIER</text>
+  <text x="672" y="153" class="node-label" text-anchor="middle">ExpClassifier</text>
+
+  <rect x="740" y="120" width="115" height="50" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="797" y="136" class="node-role" text-anchor="middle">ORCHESTRATOR</text>
+  <text x="797" y="153" class="node-label" text-anchor="middle">ExperimentPhase</text>
+
+  <rect x="865" y="120" width="105" height="50" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="917" y="136" class="node-role" text-anchor="middle">RECOVERY</text>
+  <text x="917" y="153" class="node-label" text-anchor="middle">ExperimentFix</text>
+
+  <rect x="975" y="120" width="65" height="50" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="1007" y="136" class="node-role" text-anchor="middle">FATAL</text>
+  <text x="1007" y="153" class="node-label" text-anchor="middle">Abort</text>
+
+  <!-- Orchestrator nodes row 2 (7 nodes) -->
+  <rect x="40" y="190" width="115" height="50" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="97" y="206" class="node-role" text-anchor="middle">ORCHESTRATOR</text>
+  <text x="97" y="223" class="node-label" text-anchor="middle">WritePhase</text>
+
+  <rect x="165" y="190" width="115" height="50" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="222" y="206" class="node-role" text-anchor="middle">GATE</text>
+  <text x="222" y="223" class="node-label" text-anchor="middle">PreIntegrity</text>
+
+  <rect x="290" y="190" width="115" height="50" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="347" y="206" class="node-role" text-anchor="middle">RECOVERY</text>
+  <text x="347" y="223" class="node-label" text-anchor="middle">IntegrityFix</text>
+
+  <rect x="415" y="190" width="115" height="50" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="472" y="206" class="node-role" text-anchor="middle">ORCHESTRATOR</text>
+  <text x="472" y="223" class="node-label" text-anchor="middle">ReviewPhase</text>
+
+  <rect x="540" y="190" width="120" height="50" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="600" y="206" class="node-role" text-anchor="middle">GATE</text>
+  <text x="600" y="223" class="node-label" text-anchor="middle">FinalIntegrity</text>
+
+  <rect x="670" y="190" width="135" height="50" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="737" y="206" class="node-role" text-anchor="middle">RECOVERY</text>
+  <text x="737" y="223" class="node-label" text-anchor="middle">FinalIntegrityFix</text>
+
+  <rect x="815" y="190" width="105" height="50" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="867" y="206" class="node-role" text-anchor="middle">FINALIZE</text>
+  <text x="867" y="223" class="node-label" text-anchor="middle">Finalize</text>
+
+  <rect x="930" y="190" width="110" height="50" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.2" filter="url(#sh)"/>
+  <text x="985" y="206" class="node-role" text-anchor="middle">SUMMARY</text>
+  <text x="985" y="223" class="node-label" text-anchor="middle">Summary</text>
+
+  <!-- thin gray arrows between orchestrator nodes (skipped for clarity, just the snake) -->
+  <text x="540" y="260" class="count" text-anchor="middle">linear left→right top, then left→right bottom; dashed fix-loops repeat their parent node</text>
+
+  <!-- ============================================================= -->
+  <!-- RESEARCH SUBGRAPH (y=290-600, height 310) — 12 nodes 3×4       -->
+  <!-- ============================================================= -->
+  <rect x="20" y="290" width="1060" height="310" rx="12" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="35" y="312" class="lane-title">RESEARCH SUBGRAPH  ·  research/graph.py</text>
+  <text x="1065" y="312" class="lane-meta" text-anchor="end">12 NODES · 15 SPECS (12 wired + 3 staged)</text>
+
+  <!-- Row 1: 4 nodes at x=40, 280, 520, 760 (each 220w) -->
+  <rect x="40" y="325" width="220" height="60" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="150" y="343" class="node-role" text-anchor="middle">FORMULATION</text>
+  <text x="150" y="362" class="node-label" text-anchor="middle">ResearchQuestion</text>
+  <text x="150" y="378" class="node-badge" text-anchor="middle">research_question</text>
+
+  <rect x="280" y="325" width="220" height="60" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="390" y="343" class="node-role" text-anchor="middle">METHODOLOGY</text>
+  <text x="390" y="362" class="node-label" text-anchor="middle">ResearchArchitect</text>
+  <text x="390" y="378" class="node-badge" text-anchor="middle">research_architect</text>
+
+  <rect x="520" y="325" width="220" height="60" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="630" y="343" class="node-role" text-anchor="middle">SEARCH</text>
+  <text x="630" y="362" class="node-label" text-anchor="middle">Bibliography</text>
+  <text x="630" y="378" class="node-badge" text-anchor="middle">+ Exa web_search/fetch</text>
+
+  <rect x="760" y="325" width="220" height="60" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="870" y="343" class="node-role" text-anchor="middle">VALIDATION</text>
+  <text x="870" y="362" class="node-label" text-anchor="middle">SourceVerification</text>
+  <text x="870" y="378" class="node-badge" text-anchor="middle">DOI · Semantic Scholar</text>
+
+  <!-- arrows row 1 -->
+  <path d="M 261,355 L 279,355" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+  <path d="M 501,355 L 519,355" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+  <path d="M 741,355 L 759,355" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+
+  <!-- snake R1→R2 -->
+  <path d="M 980,355 L 1010,355 L 1010,400 L 130,400 L 130,418" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+
+  <!-- Row 2: 4 nodes -->
+  <rect x="40" y="420" width="220" height="60" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="150" y="438" class="node-role" text-anchor="middle">STRUCTURE</text>
+  <text x="150" y="457" class="node-label" text-anchor="middle">KnowledgeGraph</text>
+  <text x="150" y="473" class="node-badge" text-anchor="middle">knowledge_graph</text>
+
+  <rect x="280" y="420" width="220" height="60" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="390" y="438" class="node-role" text-anchor="middle">ANALYSIS</text>
+  <text x="390" y="457" class="node-label" text-anchor="middle">Synthesis</text>
+  <text x="390" y="473" class="node-badge" text-anchor="middle">synthesis</text>
+
+  <rect x="520" y="420" width="220" height="60" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3" filter="url(#sh)"/>
+  <text x="630" y="438" class="node-role" text-anchor="middle">SPEC 2 (FLAG)</text>
+  <text x="630" y="457" class="node-label" text-anchor="middle">ChainOfIdeas</text>
+  <text x="630" y="473" class="node-flag" text-anchor="middle">chain_of_ideas + thesis_extractor</text>
+
+  <rect x="760" y="420" width="220" height="60" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="870" y="438" class="node-role" text-anchor="middle">REPORT</text>
+  <text x="870" y="457" class="node-label" text-anchor="middle">ReportCompiler</text>
+  <text x="870" y="473" class="node-badge" text-anchor="middle">report_compiler</text>
+
+  <path d="M 261,450 L 279,450" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+  <path d="M 501,450 L 519,450" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+  <path d="M 741,450 L 759,450" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+
+  <!-- snake R2→R3 -->
+  <path d="M 980,450 L 1010,450 L 1010,500 L 130,500 L 130,518" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+
+  <!-- Row 3: 4 nodes -->
+  <rect x="40" y="520" width="220" height="60" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="150" y="538" class="node-role" text-anchor="middle">VERIFICATION</text>
+  <text x="150" y="557" class="node-label" text-anchor="middle">IndependentVerifier</text>
+  <text x="150" y="573" class="node-badge" text-anchor="middle">Opus 4.7 · effort max</text>
+
+  <rect x="280" y="520" width="220" height="60" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="390" y="538" class="node-role" text-anchor="middle">REVIEW</text>
+  <text x="390" y="557" class="node-label" text-anchor="middle">EditorInChief</text>
+  <text x="390" y="573" class="node-badge" text-anchor="middle">→ EditorReview</text>
+
+  <rect x="520" y="520" width="220" height="60" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="630" y="538" class="node-role" text-anchor="middle">SPEC 8 (ALWAYS-ON)</text>
+  <text x="630" y="557" class="node-label" text-anchor="middle">EthicsReview</text>
+  <text x="630" y="573" class="node-flag" text-anchor="middle">12-item PRISMA-trAIce checklist</text>
+
+  <rect x="760" y="520" width="220" height="60" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="870" y="538" class="node-role" text-anchor="middle">AGGREGATE</text>
+  <text x="870" y="557" class="node-label" text-anchor="middle">MergeReviews</text>
+  <text x="870" y="573" class="node-badge" text-anchor="middle">→ End</text>
+
+  <path d="M 261,550 L 279,550" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+  <path d="M 501,550 L 519,550" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+  <path d="M 741,550 L 759,550" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+
+  <!-- ============================================================= -->
+  <!-- EXPERIMENT SUBGRAPH (y=610-830, height 220) — 7 nodes          -->
+  <!-- ============================================================= -->
+  <rect x="20" y="610" width="1060" height="220" rx="12" fill="#faf5ff" stroke="#c4b5fd" stroke-width="1.5"/>
+  <text x="35" y="632" class="lane-title">EXPERIMENT SUBGRAPH  ·  experiment/graph.py</text>
+  <text x="1065" y="632" class="lane-meta" text-anchor="end">7 NODES · 10 SPECS · runs only when ExpClassifier picks topic</text>
+
+  <!-- Row 1: 4 nodes (designer + 3 flag-gated) -->
+  <rect x="40" y="645" width="220" height="60" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="150" y="663" class="node-role" text-anchor="middle">PLANNER</text>
+  <text x="150" y="682" class="node-label" text-anchor="middle">ExperimentDesign</text>
+  <text x="150" y="698" class="node-badge" text-anchor="middle">+ Exa dataset search</text>
+
+  <rect x="280" y="645" width="220" height="60" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3" filter="url(#sh)"/>
+  <text x="390" y="663" class="node-role" text-anchor="middle">SPEC 7 (FLAG)</text>
+  <text x="390" y="682" class="node-label" text-anchor="middle">DesignBundle</text>
+  <text x="390" y="698" class="node-flag" text-anchor="middle">N=4 alternatives · scorer</text>
+
+  <rect x="520" y="645" width="220" height="60" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3" filter="url(#sh)"/>
+  <text x="630" y="663" class="node-role" text-anchor="middle">SPEC 7 (FLAG)</text>
+  <text x="630" y="682" class="node-label" text-anchor="middle">DesignSelection</text>
+  <text x="630" y="698" class="node-flag" text-anchor="middle">pick top K=2</text>
+
+  <rect x="760" y="645" width="220" height="60" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3" filter="url(#sh)"/>
+  <text x="870" y="663" class="node-role" text-anchor="middle">SPEC 7 (FLAG)</text>
+  <text x="870" y="682" class="node-label" text-anchor="middle">DesignComparison</text>
+  <text x="870" y="698" class="node-flag" text-anchor="middle">design_comparator</text>
+
+  <path d="M 261,675 L 279,675" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+  <path d="M 501,675 L 519,675" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+  <path d="M 741,675 L 759,675" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+
+  <!-- snake to row 2 -->
+  <path d="M 150,706 L 150,728 L 240,728 L 240,748" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)" fill="none"/>
+
+  <!-- Row 2: 3 nodes (InteractiveML, Judge, Analysis) -->
+  <rect x="150" y="750" width="220" height="60" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="260" y="768" class="node-role" text-anchor="middle">CODER</text>
+  <text x="260" y="787" class="node-label" text-anchor="middle">InteractiveML</text>
+  <text x="260" y="803" class="node-badge" text-anchor="middle">Persistent Docker · AutoGluon</text>
+
+  <rect x="450" y="750" width="220" height="60" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="560" y="768" class="node-role" text-anchor="middle">EVALUATOR</text>
+  <text x="560" y="787" class="node-label" text-anchor="middle">Judge</text>
+  <text x="560" y="803" class="node-badge" text-anchor="middle">PASS / IMPROVE / FAIL · max 2</text>
+
+  <rect x="750" y="750" width="220" height="60" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="860" y="768" class="node-role" text-anchor="middle">RESULTS</text>
+  <text x="860" y="787" class="node-label" text-anchor="middle">Analysis</text>
+  <text x="860" y="803" class="node-badge" text-anchor="middle">SHAP · figure_reviewer (VLM)</text>
+
+  <path d="M 371,780 L 449,780" stroke="#2563eb" stroke-width="1.5" marker-end="url(#a-blue)" fill="none"/>
+  <path d="M 671,780 L 749,780" stroke="#059669" stroke-width="1.5" marker-end="url(#a-green)" fill="none"/>
+  <text x="410" y="775" class="arrow-label" text-anchor="middle">execute</text>
+  <text x="710" y="775" class="arrow-label" text-anchor="middle">PASS</text>
+  <!-- Judge → InteractiveML loop arrow -->
+  <path d="M 450,800 C 380,820 280,820 280,810" stroke="#7c3aed" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#a-purple)" fill="none"/>
+  <text x="365" y="822" class="arrow-label" text-anchor="middle">IMPROVE → experiment_improver</text>
+
+  <!-- ============================================================= -->
+  <!-- WRITING SUBGRAPH (y=840-1240, height 400) — 16 nodes 4×4       -->
+  <!-- ============================================================= -->
+  <rect x="20" y="840" width="1060" height="400" rx="12" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+  <text x="35" y="862" class="lane-title">WRITING SUBGRAPH  ·  writing/graph.py</text>
+  <text x="1065" y="862" class="lane-meta" text-anchor="end">16 NODES · 13 SPECS · IMRaD when experiment data present</text>
+
+  <!-- Row 1 -->
+  <rect x="40" y="875" width="220" height="55" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="150" y="893" class="node-role" text-anchor="middle">ROUTER</text>
+  <text x="150" y="911" class="node-label" text-anchor="middle">Intake</text>
+
+  <rect x="280" y="875" width="220" height="55" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="390" y="893" class="node-role" text-anchor="middle">PLANNER</text>
+  <text x="390" y="911" class="node-label" text-anchor="middle">LiteratureStrategist</text>
+
+  <rect x="520" y="875" width="220" height="55" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="630" y="893" class="node-role" text-anchor="middle">PLANNER</text>
+  <text x="630" y="911" class="node-label" text-anchor="middle">StructureArchitect</text>
+
+  <rect x="760" y="875" width="220" height="55" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="870" y="893" class="node-role" text-anchor="middle">PLANNER</text>
+  <text x="870" y="911" class="node-label" text-anchor="middle">ArgumentBuilder</text>
+
+  <path d="M 261,902 L 279,902" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+  <path d="M 501,902 L 519,902" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+  <path d="M 741,902 L 759,902" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+  <path d="M 980,902 L 1010,902 L 1010,945 L 130,945 L 130,963" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+
+  <!-- Row 2 -->
+  <rect x="40" y="965" width="220" height="55" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="150" y="983" class="node-role" text-anchor="middle">PLANNER</text>
+  <text x="150" y="1001" class="node-label" text-anchor="middle">SectionPlanner</text>
+
+  <rect x="280" y="965" width="220" height="55" rx="8" fill="#fff7ed" stroke="#f59e0b" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="390" y="983" class="node-role" text-anchor="middle">PARALLEL WRITER</text>
+  <text x="390" y="1001" class="node-label" text-anchor="middle">ParallelSectionDraft</text>
+
+  <rect x="520" y="965" width="220" height="55" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="630" y="983" class="node-role" text-anchor="middle">AGGREGATE</text>
+  <text x="630" y="1001" class="node-label" text-anchor="middle">SectionMerger</text>
+
+  <rect x="760" y="965" width="220" height="55" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="870" y="983" class="node-role" text-anchor="middle">COHERENCE</text>
+  <text x="870" y="1001" class="node-label" text-anchor="middle">DraftWriter</text>
+
+  <path d="M 261,992 L 279,992" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+  <path d="M 501,992 L 519,992" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+  <path d="M 741,992 L 759,992" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+  <path d="M 980,992 L 1010,992 L 1010,1035 L 130,1035 L 130,1053" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+
+  <!-- Row 3 -->
+  <rect x="40" y="1055" width="220" height="55" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="150" y="1073" class="node-role" text-anchor="middle">CHECKER</text>
+  <text x="150" y="1091" class="node-label" text-anchor="middle">CitationCompliance</text>
+
+  <rect x="280" y="1055" width="220" height="55" rx="8" fill="#fff7ed" stroke="#f59e0b" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="390" y="1073" class="node-role" text-anchor="middle">PARALLEL</text>
+  <text x="390" y="1091" class="node-label" text-anchor="middle">ParallelAbstractViz</text>
+
+  <rect x="520" y="1055" width="220" height="55" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="630" y="1073" class="node-role" text-anchor="middle">AGGREGATE</text>
+  <text x="630" y="1091" class="node-label" text-anchor="middle">MergePhase5</text>
+
+  <rect x="760" y="1055" width="220" height="55" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="870" y="1073" class="node-role" text-anchor="middle">VLM REVIEW</text>
+  <text x="870" y="1091" class="node-label" text-anchor="middle">FigureVerification</text>
+
+  <path d="M 261,1082 L 279,1082" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+  <path d="M 501,1082 L 519,1082" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+  <path d="M 741,1082 L 759,1082" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+  <path d="M 980,1082 L 1010,1082 L 1010,1125 L 130,1125 L 130,1143" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+
+  <!-- Row 4 -->
+  <rect x="40" y="1145" width="220" height="55" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="150" y="1163" class="node-role" text-anchor="middle">REVIEWER</text>
+  <text x="150" y="1181" class="node-label" text-anchor="middle">PeerReviewer</text>
+
+  <rect x="280" y="1145" width="220" height="55" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="390" y="1163" class="node-role" text-anchor="middle">FORMAT</text>
+  <text x="390" y="1181" class="node-label" text-anchor="middle">Formatter</text>
+
+  <rect x="520" y="1145" width="220" height="55" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="630" y="1163" class="node-role" text-anchor="middle">CITATIONS</text>
+  <text x="630" y="1181" class="node-label" text-anchor="middle">BibTexGenerator</text>
+
+  <rect x="760" y="1145" width="220" height="55" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="870" y="1163" class="node-role" text-anchor="middle">OUTPUT</text>
+  <text x="870" y="1181" class="node-label" text-anchor="middle">LatexCompiler</text>
+
+  <path d="M 261,1172 L 279,1172" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+  <path d="M 501,1172 L 519,1172" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+  <path d="M 741,1172 L 759,1172" stroke="#059669" stroke-width="1.5" marker-end="url(#a-green)" fill="none"/>
+
+  <!-- Peer reviewer revision loop back -->
+  <path d="M 150,1145 C 150,1130 870,1130 870,1110" stroke="#7c3aed" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#a-purple)" fill="none"/>
+  <text x="510" y="1126" class="arrow-label" text-anchor="middle">REVISION → DraftWriter (max rounds)</text>
+
+  <text x="40" y="1230" class="count" text-anchor="start">+ pandoc + tectonic PDF · IEEEtran template · traceability hyperlinks (Spec 1)  ·  Spec 1 wires inline numerical_validator + Notes/Code appendices</text>
+
+  <!-- ============================================================= -->
+  <!-- REVIEW SUBGRAPH (y=1250-1470, height 220) — 6 nodes            -->
+  <!-- ============================================================= -->
+  <rect x="20" y="1250" width="1060" height="220" rx="12" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
+  <text x="35" y="1272" class="lane-title">REVIEW SUBGRAPH  ·  review/graph.py  (read-only)</text>
+  <text x="1065" y="1272" class="lane-meta" text-anchor="end">6 NODES · 12 SPECS</text>
+
+  <!-- Row 1: 4 nodes -->
+  <rect x="40" y="1285" width="220" height="60" rx="8" fill="#fed7aa" stroke="#ea580c" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="150" y="1303" class="node-role" text-anchor="middle">ANALYST</text>
+  <text x="150" y="1322" class="node-label" text-anchor="middle">FieldAnalyst</text>
+  <text x="150" y="1338" class="node-badge" text-anchor="middle">field_analyst</text>
+
+  <rect x="280" y="1285" width="220" height="60" rx="8" fill="#fed7aa" stroke="#ea580c" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="390" y="1303" class="node-role" text-anchor="middle">PARALLEL × 3</text>
+  <text x="390" y="1322" class="node-label" text-anchor="middle">ParallelReviewer</text>
+  <text x="390" y="1338" class="node-flag" text-anchor="middle">methodology · domain · perspective  /  Spec 5: personas</text>
+
+  <rect x="520" y="1285" width="220" height="60" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3" filter="url(#sh)"/>
+  <text x="630" y="1303" class="node-role" text-anchor="middle">SPEC 4 (FLAG)</text>
+  <text x="630" y="1322" class="node-label" text-anchor="middle">PointWiseNovelty</text>
+  <text x="630" y="1338" class="node-flag" text-anchor="middle">claim_extractor + S2 + assessor</text>
+
+  <rect x="760" y="1285" width="220" height="60" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3" filter="url(#sh)"/>
+  <text x="870" y="1303" class="node-role" text-anchor="middle">SPEC 6 (FLAG)</text>
+  <text x="870" y="1322" class="node-label" text-anchor="middle">CascadedReview</text>
+  <text x="870" y="1338" class="node-flag" text-anchor="middle">numerical → novelty → method → narrative</text>
+
+  <path d="M 261,1315 L 279,1315" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+  <path d="M 501,1315 L 519,1315" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+  <path d="M 741,1315 L 759,1315" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)" fill="none"/>
+
+  <!-- snake to row 2 -->
+  <path d="M 980,1315 L 1010,1315 L 1010,1370 L 280,1370 L 280,1388" stroke="#dc2626" stroke-width="1.5" marker-end="url(#a-red)" fill="none"/>
+
+  <!-- Row 2 -->
+  <rect x="170" y="1390" width="220" height="60" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="280" y="1408" class="node-role" text-anchor="middle">SYNTHESIZER</text>
+  <text x="280" y="1427" class="node-label" text-anchor="middle">EditorialSynthesizer</text>
+  <text x="280" y="1443" class="node-badge" text-anchor="middle">accept · revise · reject</text>
+
+  <rect x="450" y="1390" width="220" height="60" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="560" y="1408" class="node-role" text-anchor="middle">COACH</text>
+  <text x="560" y="1427" class="node-label" text-anchor="middle">RevisionCoaching</text>
+  <text x="560" y="1443" class="node-badge" text-anchor="middle">prioritized fixes (when REVISION)</text>
+
+  <path d="M 391,1420 L 449,1420" stroke="#dc2626" stroke-width="1.5" marker-end="url(#a-red)" fill="none"/>
+
+  <!-- ============================================================= -->
+  <!-- INTEGRITY SUBGRAPH (y=1480-1560, height 80) — 1 node           -->
+  <!-- ============================================================= -->
+  <rect x="20" y="1480" width="1060" height="80" rx="12" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
+  <text x="35" y="1502" class="lane-title">INTEGRITY SUBGRAPH  ·  integrity/graph.py</text>
+  <text x="1065" y="1502" class="lane-meta" text-anchor="end">1 NODE · 2 SPECS · runs as PreIntegrity AND FinalIntegrity</text>
+
+  <rect x="370" y="1510" width="360" height="40" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="550" y="1525" class="node-role" text-anchor="middle">GATEKEEPER  ·  integrity_verification + compliance_check</text>
+  <text x="550" y="1542" class="node-label" text-anchor="middle">IntegrityCheck — claims · plagiarism · AI-style</text>
+
+  <!-- ============================================================= -->
+  <!-- OUTPUT (y=1570-1660, height 90)                                -->
+  <!-- ============================================================= -->
+  <rect x="20" y="1570" width="1060" height="90" rx="12" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="35" y="1592" class="lane-title">OUTPUT</text>
+  <text x="1065" y="1592" class="lane-meta" text-anchor="end">JOURNAL-READY ARTIFACTS</text>
+
+  <rect x="40" y="1605" width="180" height="45" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="130" y="1622" class="node-role" text-anchor="middle">MANUSCRIPT</text>
+  <text x="130" y="1638" class="node-label" text-anchor="middle">paper.md + .pdf</text>
+
+  <rect x="240" y="1605" width="180" height="45" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="330" y="1622" class="node-role" text-anchor="middle">CITATIONS</text>
+  <text x="330" y="1638" class="node-label" text-anchor="middle">references.bib</text>
+
+  <rect x="440" y="1605" width="180" height="45" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="530" y="1622" class="node-role" text-anchor="middle">VISUALS</text>
+  <text x="530" y="1638" class="node-label" text-anchor="middle">figures + tables</text>
+
+  <rect x="640" y="1605" width="180" height="45" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="730" y="1622" class="node-role" text-anchor="middle">REPORT</text>
+  <text x="730" y="1638" class="node-label" text-anchor="middle">review.json</text>
+
+  <rect x="840" y="1605" width="180" height="45" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="930" y="1622" class="node-role" text-anchor="middle">TRACES</text>
+  <text x="930" y="1638" class="node-label" text-anchor="middle">Logfire</text>
+
+  <!-- ============================================================= -->
+  <!-- FOOTER (y=1680-1820)                                            -->
+  <!-- ============================================================= -->
+  <rect x="20" y="1680" width="1060" height="40" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="550" y="1704" class="footer-strong" text-anchor="middle">Per-Node Evaluation: Claude Opus 4.7 with rubric-based scoring  ·  Independent Verifier (Opus 4.7 max)  ·  monotonic quality gate  ·  max_node_iterations 3</text>
+
+  <text x="550" y="1740" class="count" text-anchor="middle">SCI Improvements Layer (2026-05-04, all flag-gated default off): Spec 1 traceability · Spec 2 chain-of-ideas · Spec 3 novelty gate · Spec 4 pointwise novelty · Spec 5 persona reviewers · Spec 6 cascaded review · Spec 7 design exploration · Spec 8 PRISMA-trAIce ethics</text>
+
+  <text x="550" y="1760" class="count" text-anchor="middle">v2.0 → v2.1 (per-node eval) → v2.2 (Docker) → v2.3 (dataset discovery) → v2.4 (InteractiveML + Judge) → v2.5 (SCI layer · 56 nodes · 52 specs · 6 subgraphs)</text>
+
+  <!-- Legend -->
+  <g transform="translate(40, 1790)">
+    <line x1="0" y1="8" x2="30" y2="8" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#a-purple)"/>
+    <text x="35" y="12" class="legend-text">Control flow</text>
+    <line x1="155" y1="8" x2="185" y2="8" stroke="#2563eb" stroke-width="1.5" marker-end="url(#a-blue)"/>
+    <text x="190" y="12" class="legend-text">Execution</text>
+    <line x1="295" y1="8" x2="325" y2="8" stroke="#059669" stroke-width="1.5" marker-end="url(#a-green)"/>
+    <text x="330" y="12" class="legend-text">Verified output</text>
+    <line x1="465" y1="8" x2="495" y2="8" stroke="#ea580c" stroke-width="1.5" marker-end="url(#a-orange)"/>
+    <text x="500" y="12" class="legend-text">Data transform</text>
+    <line x1="635" y1="8" x2="665" y2="8" stroke="#dc2626" stroke-width="1.5" marker-end="url(#a-red)"/>
+    <text x="670" y="12" class="legend-text">Integrity gate</text>
+    <line x1="800" y1="8" x2="830" y2="8" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a-purple)"/>
+    <text x="835" y="12" class="legend-text">Eval / revise loop</text>
+  </g>
+  <g transform="translate(40, 1820)">
+    <rect x="0" y="0" width="20" height="14" rx="3" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <text x="25" y="11" class="legend-text">Flag-gated SCI node (default off)</text>
+    <rect x="270" y="0" width="20" height="14" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/>
+    <text x="295" y="11" class="legend-text">Independent verifier / VLM reviewer</text>
+    <rect x="555" y="0" width="20" height="14" rx="3" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.2"/>
+    <text x="580" y="11" class="legend-text">External tool integration (Exa, Docker, S2)</text>
+  </g>
+</svg>

@@ -1,0 +1,79 @@
+% acl-header.tex — included via pandoc --include-in-header
+%
+% Loads ACL conference style on top of pandoc's default LaTeX template.
+% Combined with `-V documentclass=article -V classoption=11pt`, this
+% reproduces the *ACL paper format (2-column, A4, Times-like font, natbib
+% author-year citations).
+%
+% Used by compile_pdf_pandoc in
+% src/academic_pipeline/tools/rendering/latex_compiler.py
+
+% ACL style. `final` (no option) = production; review/preprint variants
+% are intentionally omitted because the pipeline ships final-only PDFs.
+\usepackage{acl}
+
+% Times-like font and font encoding.
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage{microtype}
+
+% Tables: pandoc emits longtable for any markdown table > a few rows.
+% A separate lua filter (longtable-to-table-star.lua) rewrites those into
+% \begin{table*}\begin{tabular}...\end{tabular}\end{table*} so they span
+% both columns. The rewritten tabular still uses pandoc's calculated
+% column widths (`>{\raggedright\arraybackslash}p{... * \real{0.20}}`)
+% which require `array` (for the `>{}` modifier) and `calc` (for
+% `\real`). Pandoc's default template loads these only when it thinks
+% it needs longtable — and the lua filter strips longtable, so we must
+% load them ourselves or the rewritten table* crashes tectonic with
+% "Undefined control sequence" on `\real`.
+\usepackage{array}
+\usepackage{calc}
+\usepackage{longtable}
+\usepackage{booktabs}
+
+% Figures: graphicx is loaded by pandoc's default template, but we make
+% sure caption styling is consistent with ACL conventions (small font,
+% italic label).
+\usepackage{caption}
+\captionsetup[figure]{font=small,labelfont=bf}
+\captionsetup[table]{font=small,labelfont=bf}
+
+% Pandoc's tightlist provider is required when --markdown-in-html-blocks
+% emits tight unordered lists.
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Unicode math + punctuation fallbacks: Times (ptmr8t) doesn't ship glyphs
+% for these, so remap them to TeX-safe equivalents to avoid "Missing
+% character" warnings and \U+FFFD blocks in the output PDF.
+\usepackage{newunicodechar}
+% Math
+\newunicodechar{≥}{$\geq$}
+\newunicodechar{≤}{$\leq$}
+\newunicodechar{≠}{$\neq$}
+\newunicodechar{±}{$\pm$}
+\newunicodechar{×}{$\times$}
+\newunicodechar{∼}{$\sim$}
+\newunicodechar{≈}{$\approx$}
+\newunicodechar{→}{$\rightarrow$}
+\newunicodechar{←}{$\leftarrow$}
+% Punctuation: em-dash, en-dash, smart quotes, ellipsis
+\newunicodechar{—}{---}
+\newunicodechar{–}{--}
+\newunicodechar{‘}{`}
+\newunicodechar{’}{'}
+\newunicodechar{“}{``}
+\newunicodechar{”}{''}
+\newunicodechar{…}{\ldots}
+% Superscript digits used in p-values like 7.6×10⁻⁶
+\newunicodechar{⁰}{$^{0}$}
+\newunicodechar{¹}{$^{1}$}
+\newunicodechar{²}{$^{2}$}
+\newunicodechar{³}{$^{3}$}
+\newunicodechar{⁴}{$^{4}$}
+\newunicodechar{⁵}{$^{5}$}
+\newunicodechar{⁶}{$^{6}$}
+\newunicodechar{⁷}{$^{7}$}
+\newunicodechar{⁸}{$^{8}$}
+\newunicodechar{⁹}{$^{9}$}
+\newunicodechar{⁻}{$^{-}$}

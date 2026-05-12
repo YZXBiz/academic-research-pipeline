@@ -1,0 +1,28 @@
+schema_version: 1
+dataset:
+  source: file://.
+  files: [iris.csv]
+  entity_id_column: row_id
+feature_engineering:
+  sql: |
+    SELECT
+      ROW_NUMBER() OVER () AS row_id,
+      sepal_length,
+      sepal_width,
+      petal_length,
+      petal_width
+    FROM raw_iris
+problem:
+  type: clustering_with_kpi
+  clustering:
+    algorithms: [kmeans, hierarchical_ward]
+    k_grid: [3]
+    bootstrap_n: 5
+  kpi:
+    label_column: petal_length
+    predictor: tabular
+    presets: medium_quality
+    time_limit_s: 30
+    eval_metric: rmse
+mlflow:
+  experiment_name: smoke_test_clustering

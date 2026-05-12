@@ -1,0 +1,20 @@
+schema_version: 1
+dataset:
+  source: file://.
+  files: [iris.csv]
+  entity_id_column: row_id
+feature_engineering:
+  sql: |
+    SELECT
+      ROW_NUMBER() OVER () AS row_id,
+      sepal_length,
+      sepal_width,
+      petal_length,
+      petal_width
+    FROM raw_iris
+problem:
+  type: clustering
+  clustering:
+    algorithms: [kmeans]
+    k_grid: [3]
+    bootstrap_n: 0

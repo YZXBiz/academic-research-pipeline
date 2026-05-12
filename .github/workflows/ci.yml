@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  version-consistency:
+    # PRD §6.14.T3 — required per-PR check that VERSION, pyproject.toml::version,
+    # and README badges agree. Pairs with §6.12.T6 (the script being invoked).
+    # Pure stdlib (re, sys, tomllib, pathlib) — no `uv sync` needed.
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+      - name: Check VERSION / pyproject.toml / README badges agree
+        run: uv run python tools/check_version_consistency.py
+
+  pre-commit:
+    # PRD §6.14.T4 — runs the same pre-commit hooks contributors get locally
+    # (.pre-commit-config.yaml: ruff, ruff-format, trailing-whitespace,
+    # end-of-file-fixer, check-yaml, check-json, check-added-large-files,
+    # no-commit-to-branch). --show-diff-on-failure prints the offending diff
+    # so PR authors can `git apply` the suggested fix locally.
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+      - run: uv pip install --system pre-commit
+      - name: Run pre-commit on all files
+        run: pre-commit run --all-files --show-diff-on-failure
+
+  lint:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+      - run: uv sync --all-extras
+      - name: Ruff lint
+        run: uv run ruff check src/academic_pipeline/ tests/
+      - name: Ruff format check
+        run: uv run ruff format --check src/academic_pipeline/ tests/
+
+  typecheck:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+      - run: uv sync --all-extras
+      # PRD §6.14.T7 — basedpyright is the canonical typechecker for this
+      # project (pyright was a leftover; reconciled 2026-05-06). The Makefile
+      # `typecheck` target uses `npx basedpyright`; CI uses the
+      # `pip install`-able `basedpyright` package which ships the same engine.
+      - run: uv pip install basedpyright
+      - name: Basedpyright type check
+        run: uv run basedpyright src/academic_pipeline/
+
+  test:
+    runs-on: self-hosted
+    needs: [lint, typecheck]
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync --all-extras
+      - name: Run tests with coverage
+        run: uv run pytest tests/ -v --cov=academic_pipeline --cov-report=term-missing --cov-fail-under=60
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+  test-medium:
+    # PRD §6.14.T1 — Docker-backed integration tests (`make test-integration`
+    # → `pytest -m medium`). Gated on lint + typecheck so we only burn the
+    # Docker runner cycles on PRs that already pass the cheap checks.
+    # Skipped on fork PRs because `secrets.*` is empty for them and Docker
+    # integration tests need API keys + image pulls that we don't expose to
+    # untrusted forks (standard GitHub Actions security guideline).
+    runs-on: self-hosted
+    needs: [lint, typecheck]
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+      - run: uv sync --all-extras
+      - name: Run medium-tier integration tests
+        run: make test-integration
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+
+  security:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+      - run: uv sync --all-extras
+      - run: uv pip install pip-audit bandit
+      - name: Audit dependencies for known vulnerabilities
+        run: uv run pip-audit
+      # PRD §6.14.T8 — bandit blocks on medium+ severity. Low-severity
+      # findings (35 today, mostly subprocess + hardcoded "PASS"/"PASS_WITH_
+      # CONDITIONS" enum literals) stay informational so the gate doesn't
+      # false-positive on them. Removing the prior `|| true` mask means a
+      # NEW medium- or high-severity finding actually fails the build.
+      - name: Bandit security linter
+        run: uv run bandit -r src/academic_pipeline/ -c pyproject.toml --severity-level medium
+
+  # Docker build smoke test — uncomment when runner has Docker
+  # docker:
+  #   runs-on: self-hosted
+  #   needs: test
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: docker/setup-buildx-action@v3
+  #     - uses: docker/build-push-action@v6
+  #       with:
+  #         context: .
+  #         push: false
+  #         tags: academic-pipeline:${{ github.sha }}
+  #         cache-from: type=gha
+  #         cache-to: type=gha,mode=max

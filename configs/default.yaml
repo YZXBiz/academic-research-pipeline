@@ -1,0 +1,107 @@
+# Default pipeline configuration. configs/dev.yaml + env vars + .env override these.
+# Secrets MUST stay in .env — never put API keys here.
+
+# Models
+model_name: "claude-opus-4-7"
+independent_verifier_model: "anthropic:claude-opus-4-7"
+
+# Temperatures
+temperature_research: 0.3
+temperature_writing: 0.5
+temperature_review: 0.3
+
+# Quality / effort
+effort: "max"
+
+# Checkpointing
+checkpointer_backend: "sqlite"
+
+# Loop limits
+max_integrity_fix_loops: 3
+
+# Per-node evaluator-optimizer
+evaluator_models:
+  - "anthropic:claude-opus-4-7"
+max_node_iterations: 2
+node_quality_threshold: 7.0
+# Per-node overrides for node_quality_threshold. Missing entries fall back to
+# the global default above. PRD §6.12.T5 + §6.11.T4.
+node_quality_thresholds: {}
+enable_node_evaluation: true
+enable_compliance_check: true
+
+# Network
+ssl_verify: true
+http_timeout_seconds: 20
+http_max_retries: 3
+http_backoff_base: 1.0
+
+# Resume limits
+max_pipeline_resumes: 50
+max_subgraph_resumes: 20
+
+# LLM resilience
+llm_timeout_seconds: 600
+llm_max_retries: 3
+anthropic_max_retries: 3
+
+# Logging
+log_dir: "logs"
+log_max_bytes: 10485760  # 10 MB
+log_backup_count: 5
+
+# Context compaction
+compaction_token_threshold: 800000
+
+# Experiment subgraph
+experiment_timeout_seconds: 1800
+experiment_max_retries: 3
+experiment_max_improvements: 2
+experiment_seeds:
+  - 42
+  - 123
+  - 456
+experiment_enabled: true
+force_experiment: false
+
+# Docker execution for experiments
+experiment_use_docker: true
+experiment_docker_image: "academic-pipeline-sandbox:latest"
+experiment_docker_memory: "4g"
+experiment_docker_cpus: "2"
+experiment_docker_pass_api_keys: false
+
+# Rate limiting
+tool_call_delay_seconds: 10
+
+# SCI flag bundle (PRD §6.12.T1) — Phase 0 plumbing, defaults preserve current
+# behavior until each subsystem's Phase 2 wiring lands. Flip any flag here or
+# via env var (e.g. ETHICS_CHECKLIST_ENABLED=true) to opt in early.
+traceability_mode: "off"
+# PRD §6.1.T1 — Phase 4 default-on. Chain-of-Ideas + thesis extractor are the
+# canonical research path. Set legacy_knowledge_graph: true to keep the legacy
+# KnowledgeGraphNode running alongside (PRD §6.1.T2 honors the escape hatch).
+chain_of_ideas_enabled: true
+novelty_gate_enabled: false
+pointwise_novelty_enabled: false
+persona_reviewers_enabled: false
+cascaded_review_enabled: false
+exploration_breadth_enabled: false
+# PRD §6.5.T1 — Phase 4 default-on. EthicsChecklistNode in integrity subgraph
+# replaces legacy freeform research-side EthicsReviewNode (deletion is §6.1.T6).
+ethics_checklist_enabled: true
+
+# SCI legacy escape hatches — set true to force the legacy path even when the
+# corresponding canonical flag above is enabled. Use only when a Phase 2 wiring
+# regresses behavior in production.
+legacy_traceability: false
+legacy_chain_of_ideas: false
+# PRD §6.1.T1 — flip true to keep the legacy KnowledgeGraphNode running once
+# §6.1.T2 rewires research/graph.py for the Phase 4 topology.
+legacy_knowledge_graph: false
+legacy_novelty_gate: false
+legacy_pointwise_novelty: false
+legacy_persona_reviewers: false
+legacy_cascaded_review: false
+legacy_exploration_breadth: false
+legacy_ethics_checklist: false

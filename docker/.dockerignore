@@ -1,0 +1,58 @@
+# Version control
+.git/
+.gitignore
+
+# Virtual environment
+.venv/
+
+# Tests and docs (not needed in production image)
+tests/
+docs/
+
+# CI / IDE
+.github/
+.claude/
+.cursor/
+.idea/
+.vscode/
+
+# Caches and artifacts
+__pycache__/
+.pytest_cache/
+.hypothesis/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+htmlcov/
+.coverage
+*.egg-info/
+dist/
+build/
+
+# LangGraph local state
+.langgraph/
+.langgraph_api/
+
+# Playwright
+.playwright-mcp/
+
+# Generated output
+output/
+
+# Secrets and local config
+.env
+*.db
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Other
+*.md
+LICENSE
+Makefile
+pyrightconfig.json
+.pre-commit-config.yaml
+.dockerignore
+Dockerfile
+docker-compose.yml

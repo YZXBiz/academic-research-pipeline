@@ -1,0 +1,53 @@
+# Reproduces the topic from run-0504-1802_ec44 — pharmacy store segmentation.
+schema_version: 1
+
+dataset:
+  source: huggingface://t4tiana/store-sales-time-series-forecasting
+  files: [train.csv, stores.csv]
+  entity_id_column: store_nbr
+
+feature_engineering:
+  sql: |
+    WITH monthly AS (
+      SELECT
+        store_nbr,
+        family,
+        DATE_TRUNC('month', date) AS ym,
+        SUM(sales) AS msales,
+        SUM(onpromotion) AS mpromo
+      FROM raw_train
+      GROUP BY 1, 2, 3
+    ),
+    last_18_months AS (
+      SELECT * FROM monthly
+      WHERE ym >= (
+        SELECT DATE_TRUNC('month', MAX(date)) - INTERVAL '18 MONTHS' FROM raw_train
+      )
+    )
+    SELECT
+      store_nbr,
+      LN(SUM(msales) + 1) AS total_sales_log,
+      COUNT(DISTINCT family) AS family_diversity,
+      AVG(mpromo) AS avg_monthly_promo,
+      STDDEV(msales) / NULLIF(AVG(msales), 0) AS sales_cv
+    FROM last_18_months
+    GROUP BY store_nbr
+
+problem:
+  type: clustering_with_kpi
+  clustering:
+    algorithms: [kmeans, hierarchical_ward, gmm]
+    k_grid: [3, 4, 5, 6, 7, 8]
+    validity_metrics: [silhouette, davies_bouldin, calinski_harabasz]
+    bootstrap_n: 30
+  kpi:
+    label_column: total_sales_log
+    predictor: tabular
+    presets: good_quality
+    time_limit_s: 180
+    eval_metric: rmse
+
+mlflow:
+  experiment_name: pharmacy_clustering_v2
+  tags:
+    paper_topic: retail_clustering

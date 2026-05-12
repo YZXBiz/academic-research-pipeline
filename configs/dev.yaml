@@ -1,0 +1,14 @@
+# Dev overrides — faster iteration, looser timeouts.
+# Use this when you want quicker pipeline runs at the cost of waiting less for
+# slow upstream calls (e.g. local smoke tests, debugging node wiring). Loaded
+# AFTER default.yaml, so listed keys override the baseline. Env vars + .env
+# still beat this file.
+#
+# Quality knobs (node_quality_threshold, max_node_iterations,
+# enable_node_evaluation) intentionally NOT overridden here — flip them via env
+# vars when you need a fast/dirty run, so default.yaml stays the source of
+# truth for "what good looks like".
+
+http_timeout_seconds: 10
+llm_timeout_seconds: 120
+tool_call_delay_seconds: 0
