@@ -93,19 +93,39 @@ class ComplianceCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
     """Check PRISMA-trAIce compliance at the current integrity gate."""
 
     async def run(self, ctx: GraphRunContext[IntegrityState, PipelineDeps]) -> End[str]:
-        """Evaluate paper against stage-specific PRISMA-trAIce checklist."""
+        """Evaluate the paper for compliance.
+
+        Scores the AI-use disclosure checklist plus the methodology-appropriate
+        study-design reporting guideline (PRISMA/CHERRIES/STROBE/CONSORT).
+        """
         if not ctx.deps.config.enable_compliance_check:
             return End("Compliance check disabled.")
 
-        checklist = _PRISMA_CHECKLIST_25 if ctx.state.compliance_stage == "2.5" else _PRISMA_CHECKLIST_45
+        # PRISMA-trAIce here is the AI-USE DISCLOSURE checklist (tool ID, human
+        # oversight, prompts, validation) — methodology-agnostic. The
+        # study-design reporting guideline (PRISMA/CHERRIES/STROBE/CONSORT) is
+        # routed separately by build_compliance_prompt so a survey is scored
+        # against CHERRIES rather than every item coming back not-applicable.
+        ai_disclosure_checklist = (
+            _PRISMA_CHECKLIST_25 if ctx.state.compliance_stage == "2.5" else _PRISMA_CHECKLIST_45
+        )
+
+        from academic_pipeline.integrity.reporting_guidelines import build_compliance_prompt
+        from academic_pipeline.models.writing import PaperDraft as _PaperDraft
 
         draft = ctx.state.paper_draft
-        if isinstance(draft, dict):
-            draft_text = json.dumps(draft, indent=2, ensure_ascii=False, default=str)
-        else:
-            draft_text = str(draft)
+        if isinstance(draft, _PaperDraft):
+            from academic_pipeline.runtime.paper_renderer import render_markdown
 
-        prompt = f"Stage: {ctx.state.compliance_stage}\n\nChecklist:\n{checklist}\n\nPaper:\n{draft_text[:50000]}"
+            draft_markdown = render_markdown(draft)
+        elif isinstance(draft, dict):
+            draft_markdown = json.dumps(draft, indent=2, ensure_ascii=False, default=str)
+        else:
+            draft_markdown = str(draft)
+
+        prompt = build_compliance_prompt(
+            ai_disclosure_checklist, draft_markdown, ctx.state.compliance_stage
+        )
 
         result = await traced_agent_run(
             _agents["compliance_check"], prompt, deps=ctx.deps, name="compliance_check", phase="03-integrity"

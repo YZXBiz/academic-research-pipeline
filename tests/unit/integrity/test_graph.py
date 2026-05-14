@@ -333,6 +333,46 @@ class TestDiscussionResultsGate:
         assert "PASS" in str(state.integrity_report.get("verdict"))
 
 
+class TestComplianceMethodologyRouting:
+    """ComplianceCheckNode runs end-to-end on a real PaperDraft, exercising
+    the render_markdown + methodology-routed prompt path. Routing correctness
+    itself is unit-tested in test_reporting_guidelines.py."""
+
+    async def test_runs_on_survey_paper_draft(self) -> None:
+        from academic_pipeline.models.shared import Author, Reference
+        from academic_pipeline.models.writing import PaperDraft, Section
+
+        survey_draft = PaperDraft(
+            title="A Survey Study",
+            abstract="Abstract.",
+            authors=[Author(name="Test", affiliation="Lab")],
+            keywords=["k1", "k2", "k3"],
+            sections=[
+                Section(
+                    heading="Methods",
+                    level=1,
+                    content="We administered a Likert-scale questionnaire survey to respondents.",
+                    word_count=10,
+                    citation_count=0,
+                ),
+            ],
+            references=[Reference(id="r1", full_citation="Test (2024).")],
+            total_word_count=10,
+        )
+        state = IntegrityState(paper_draft=survey_draft, compliance_stage="2.5")
+        deps = make_test_deps()
+        compliance_model = TestModel(
+            custom_output_text=_json_for_compliance(block_decision="pass", summary="Scored."),
+            call_tools=[],
+        )
+        with _integrity_agents["compliance_check"].override(model=compliance_model):
+            graph = Graph(nodes=[ComplianceCheckNode])
+            result = await graph.run(ComplianceCheckNode(), state=state, deps=deps)
+
+        assert result.output is not None
+        assert state.compliance_report is not None
+
+
 class TestFailureModeWiring:
     async def test_failure_modes_from_structured_output(self) -> None:
         state = IntegrityState(paper_draft={"title": "Test", "content": "Test paper."})
