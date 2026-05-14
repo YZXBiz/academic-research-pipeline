@@ -1,9 +1,10 @@
 # Default pipeline configuration. configs/dev.yaml + env vars + .env override these.
 # Secrets MUST stay in .env — never put API keys here.
 
-# Models
-model_name: "claude-opus-4-7"
-independent_verifier_model: "anthropic:claude-opus-4-7"
+# Models — all agents route through DeepSeek's official API (api.deepseek.com).
+# There is no Anthropic provider in this project; see CLAUDE.md "Model + API".
+model_name: "deepseek-v4-pro"
+independent_verifier_model: "openai:deepseek-v4-pro"
 
 # Temperatures
 temperature_research: 0.3
@@ -19,9 +20,11 @@ checkpointer_backend: "sqlite"
 # Loop limits
 max_integrity_fix_loops: 3
 
-# Per-node evaluator-optimizer
+# Per-node evaluator-optimizer. Single-model panel (same model as the writer)
+# until a second provider key is available — see CLAUDE.md note on restoring
+# true cross-model evaluation.
 evaluator_models:
-  - "anthropic:claude-opus-4-7"
+  - "openai:deepseek-v4-pro"
 max_node_iterations: 2
 node_quality_threshold: 7.0
 # Per-node overrides for node_quality_threshold. Missing entries fall back to
