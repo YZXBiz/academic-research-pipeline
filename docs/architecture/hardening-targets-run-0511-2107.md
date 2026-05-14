@@ -8,6 +8,29 @@ not reach the review-phase gauntlet.
 The findings below are the load-bearing diagnostic. Everything else from this
 run (citation hygiene, RQ framing, bibliography content) was clean.
 
+## Status (2026-05-14)
+
+All four hardening bugs are addressed plus the dominant failure class:
+
+- **citation_grounding** — new writing-phase agent + parser + models, wired
+  into the integrity gate as a hard FAIL on contradicts/unsupported verdicts.
+  Closes the dominant failure class (citations not matching their source).
+- **Bug 1** (severity inversion) — mitigated structurally: the deterministic
+  `placeholder_scan` and the new `discussion_results_consistency` gate force
+  FAIL without relying on the LLM's severity classifier at all.
+- **Bug 2** (Discussion-vs-Results) — new `discussion_results_consistency.py`
+  deterministic scanner, wired into IntegrityCheckNode as Layer 4b.
+- **Bug 3** (Phase E sampling) — `integrity_verification.yaml` sampling floor
+  raised; numeric / framework-attribution / Abstract+Results+Discussion claims
+  now mandatory-full-verify.
+- **Bug 4** (methodology-aware compliance) — new `reporting_guidelines.py`
+  routes the compliance check to PRISMA/CHERRIES/STROBE/CONSORT by detected
+  study design.
+
+Infra findings below (timeouts, message serialization, CrossRef) were handled
+in the 2026-05-12/13 commits. The remaining open item is the PydanticAI ↔
+DeepSeek message-serialization 400.
+
 ## What the gates caught (citation hygiene — strong)
 
 The PreIntegrityNode classifier reliably catches structural citation defects:
