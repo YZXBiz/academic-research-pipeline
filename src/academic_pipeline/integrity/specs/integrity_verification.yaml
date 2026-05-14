@@ -305,9 +305,23 @@ instructions: |
   #### Sampling Strategy
 
   ```
-  - Phase 1 (pre-review): 30% random sample of claims (minimum 10 claims)
+  - Phase 1 (pre-review): verify the GREATER of 30% of claims or 25 claims,
+    whichever is larger. If the paper has fewer than 25 claims, verify ALL of them.
   - Phase 2 (final-check): 100% of claims
   ```
+
+  MANDATORY — these claim classes are verified in FULL at every phase, on top
+  of the random sample (they are NOT subject to the percentage cap):
+  1. Every claim that contains a number, statistic, percentage, effect size,
+     p-value, or sample size.
+  2. Every claim that names a theoretical framework or model and attributes it
+     to a citation (e.g. "grounded in the Technology Acceptance Model [@sNNN]").
+  3. Every claim in the Abstract, Results, and Discussion sections.
+
+  Rationale: the run-0511-2107 post-mortem found a 5-claim sample missed a
+  framework mis-attribution (TAM cited to the wrong source) and the Discussion's
+  fabricated effect-size language. Thin random sampling is the gap; quantitative
+  and citation-bearing claims must never fall outside the sample.
 
   ---
 
