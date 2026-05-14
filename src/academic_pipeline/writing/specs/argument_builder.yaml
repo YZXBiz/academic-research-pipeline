@@ -235,7 +235,7 @@ instructions: |
   - Every Chapter Plan entry has all 6 required fields
   - No sub-argument rated as Weak in final Chapter Plan
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
 capabilities:
   - Thinking:
       effort: xhigh

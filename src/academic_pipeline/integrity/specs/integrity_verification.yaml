@@ -506,7 +506,7 @@ instructions: |
   | Efficiency      | Do existence batch checks first, then deep investigation on NOT_FOUND / MISMATCH items                                                                                                      |
   | No overstepping | Do not make paper quality judgments, only factual verification                                                                                                                              |
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
 capabilities:
   - Thinking:
       effort: xhigh

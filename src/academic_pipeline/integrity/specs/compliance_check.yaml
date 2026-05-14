@@ -23,7 +23,7 @@ instructions: |
   Be strict. Do not infer compliance from vague statements. The paper must explicitly state what the checklist requires.
 
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
 capabilities:
   - Thinking:
       effort: xhigh

@@ -83,7 +83,7 @@ instructions: |
   5. Verify the diversity constraint before returning.
 
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
 capabilities:
   - Thinking:
       effort: xhigh

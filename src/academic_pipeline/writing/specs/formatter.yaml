@@ -732,7 +732,7 @@ instructions: |
   - Conversion commands provided for non-native formats
   - Final quality checklist completed with all items passing
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
 capabilities:
   - Thinking:
       effort: xhigh

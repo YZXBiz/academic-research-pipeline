@@ -69,7 +69,7 @@ instructions: |
   methodological verdict to the editor.
 
 model_settings:
-  max_tokens: 64000
+  max_tokens: 32000
   extra_body:
     thinking:
       type: enabled

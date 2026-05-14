@@ -32,7 +32,7 @@ instructions: |
   - all_pass: true if all figures score >= 8
   - summary: brief assessment
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
   extra_body:
     thinking:
       type: enabled

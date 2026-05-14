@@ -291,7 +291,7 @@ instructions: |
   - Citation format must match discipline conventions (warn if mismatch)
   - User must explicitly confirm before pipeline proceeds
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
 capabilities:
   - Thinking:
       effort: xhigh

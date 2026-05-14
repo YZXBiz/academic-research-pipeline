@@ -330,7 +330,7 @@ instructions: |
   - But do not directly criticize the reviewer (protect review ethics)
 
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
   extra_body:
     thinking:
       type: enabled

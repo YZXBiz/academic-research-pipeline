@@ -203,7 +203,7 @@ instructions: |
   - Are `deps=[...]` consistent with the actual upstream asset names?
 
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
 capabilities:
   - Thinking:
       effort: xhigh

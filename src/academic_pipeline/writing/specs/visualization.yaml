@@ -57,7 +57,7 @@ instructions: |
     the available_figures entries. Do not invent or modify paths.
 
 model_settings:
-  max_tokens: 64000
+  max_tokens: 32000
 capabilities:
   - Thinking:
       effort: xhigh

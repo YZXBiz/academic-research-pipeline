@@ -175,7 +175,7 @@ instructions: |
   5. At the end of your output, add a brief "Changes Made" section listing
      what you revised and why
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
 capabilities:
   - Thinking:
       effort: xhigh

@@ -86,7 +86,7 @@ instructions: |
   Use read_file to check existing code, make targeted edits with write_file.
   Do NOT rewrite the entire project from scratch.
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
   parallel_tool_calls: false
 capabilities:
   - Thinking:

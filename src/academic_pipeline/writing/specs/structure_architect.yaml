@@ -392,7 +392,7 @@ instructions: |
   If experiment_results is absent, use the standard structure selection
   (Thematic Lit Review, Theoretical, etc.) based on the topic type.
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
 capabilities:
   - Thinking:
       effort: xhigh

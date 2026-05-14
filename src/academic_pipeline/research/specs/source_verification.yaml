@@ -188,7 +188,7 @@ instructions: |
   - Rejection requires documented justification
   - Cross-reference rate: at least 30% of factual claims verified against independent sources
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
 capabilities:
   - Thinking:
       effort: xhigh

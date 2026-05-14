@@ -223,7 +223,7 @@ instructions: |
   - Identify the paper's language
   - Suggest reviewers conduct the review in the paper's language
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
   extra_body:
     thinking:
       type: enabled

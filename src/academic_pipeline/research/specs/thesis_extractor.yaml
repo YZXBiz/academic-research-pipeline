@@ -36,6 +36,6 @@ instructions: |
   A `ThesisStatement` with `claim`, `novelty_dimension`, and
   `grounded_in_milestone`.
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
 retries: 2
 output_retries: 2

@@ -224,7 +224,7 @@ instructions: |
   4. **Journal TOC Alerts**: Visit each tracked journal's website → subscribe to table of contents alerts
   5. **Citation Alerts**: In Web of Science or Scopus → find your paper (once published) → set up citation alerts
 model_settings:
-  max_tokens: 128000
+  max_tokens: 32000
 capabilities:
   - Thinking:
       effort: xhigh
