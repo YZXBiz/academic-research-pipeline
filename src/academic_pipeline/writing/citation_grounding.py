@@ -146,13 +146,15 @@ def _citation_ids_in_sentence(sentence: str) -> list[str]:
       - pandoc:        `@s007`, `[@s001; @s002]`
       - bare-bracket:  `[S02]`, `[S03, S11]`
     """
-    found: list[tuple[int, str]] = []
-    for m in _CITATION_RE.finditer(sentence):
-        found.append((m.start(), m.group(1)))
+    found: list[tuple[int, str]] = [
+        (m.start(), m.group(1)) for m in _CITATION_RE.finditer(sentence)
+    ]
     for group in _BRACKET_GROUP_RE.finditer(sentence):
         group_start = group.start(1)
-        for key in _BRACKET_KEY_RE.finditer(group.group(1)):
-            found.append((group_start + key.start(), key.group(0)))
+        found.extend(
+            (group_start + key.start(), key.group(0))
+            for key in _BRACKET_KEY_RE.finditer(group.group(1))
+        )
     found.sort(key=lambda pair: pair[0])
     return [cid for _, cid in found]
 
