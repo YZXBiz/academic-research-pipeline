@@ -39,6 +39,12 @@ __all__ = [
 # `sNNN`-style keys. The negative-lookbehind on `\w` filters out email
 # addresses like `user@example` (the `@` after `user` would otherwise match).
 _CITATION_RE = re.compile(r"(?<!\w)@([A-Za-z][A-Za-z0-9_]*)")
+# Section writers also emit non-pandoc bare-bracket citations: `[S02]` or
+# `[S03, S11]` (observed in run-0514). A bracket-citation group is `[` then
+# one-or-more `Sxxx`/`sxxx` keys separated by `,`/`;` then `]`. The `[Ss]\d`
+# requirement after `[` keeps `[1]`, `[FIGURE: 1]`, `[see Section 2]` out.
+_BRACKET_GROUP_RE = re.compile(r"\[\s*([Ss]\d+(?:\s*[,;]\s*[Ss]\d+)*)\s*\]")
+_BRACKET_KEY_RE = re.compile(r"[Ss]\d+")
 _FRONTMATTER_RE = re.compile(r"\A---\n.*?\n---\n", re.DOTALL)
 _HEADING_RE = re.compile(r"^#{1,6}\s+(.*?)\s*$", re.MULTILINE)
 _FENCE_RE = re.compile(r"^```")
@@ -133,6 +139,24 @@ def _split_sentences(paragraph: str) -> list[str]:
     return [s.strip() for s in pieces if s.strip()]
 
 
+def _citation_ids_in_sentence(sentence: str) -> list[str]:
+    """Every citation id in a sentence, in order of appearance.
+
+    Handles both citation forms the section writers emit:
+      - pandoc:        `@s007`, `[@s001; @s002]`
+      - bare-bracket:  `[S02]`, `[S03, S11]`
+    """
+    found: list[tuple[int, str]] = []
+    for m in _CITATION_RE.finditer(sentence):
+        found.append((m.start(), m.group(1)))
+    for group in _BRACKET_GROUP_RE.finditer(sentence):
+        group_start = group.start(1)
+        for key in _BRACKET_KEY_RE.finditer(group.group(1)):
+            found.append((group_start + key.start(), key.group(0)))
+    found.sort(key=lambda pair: pair[0])
+    return [cid for _, cid in found]
+
+
 def parse_citations(text: str) -> list[ParsedCitation]:
     """Extract every pandoc-style citation occurrence from a paper draft.
 
@@ -154,7 +178,7 @@ def parse_citations(text: str) -> list[ParsedCitation]:
             # Heading-only paragraph contributes no citations.
             continue
         for sentence in _split_sentences(paragraph):
-            ids_in_sentence = [m.group(1) for m in _CITATION_RE.finditer(sentence)]
+            ids_in_sentence = _citation_ids_in_sentence(sentence)
             if not ids_in_sentence:
                 continue
             sentence_local = paragraph.find(sentence)

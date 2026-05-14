@@ -51,6 +51,65 @@ Multiple studies report low adoption [@s002; @s003; @s004].
         # All three share the same surrounding sentence
         assert len({c.claim_text for c in results}) == 1
 
+
+class TestBareBracketCitations:
+    """Section writers also emit non-pandoc bare-bracket citations like
+    `[S02]` / `[S03, S11]` (observed in run-0514). The parser must catch
+    these too, or CitationGroundingNode silently no-ops on such papers."""
+
+    def test_single_bare_bracket(self) -> None:
+        text = """# Introduction
+
+Prior work establishes the baseline [S02].
+"""
+        results = parse_citations(text)
+        assert len(results) == 1
+        assert results[0].citation_id == "S02"
+        assert results[0].section == "Introduction"
+
+    def test_bare_bracket_comma_group(self) -> None:
+        text = """# Background
+
+Multiple studies report this [S03, S11].
+"""
+        results = parse_citations(text)
+        ids = [c.citation_id for c in results]
+        assert ids == ["S03", "S11"]
+        assert len({c.claim_text for c in results}) == 1  # share the sentence
+
+    def test_bare_bracket_lowercase_and_padded(self) -> None:
+        text = """# Discussion
+
+As shown earlier [s002], adoption is low.
+"""
+        results = parse_citations(text)
+        assert [c.citation_id for c in results] == ["s002"]
+
+    def test_pandoc_and_bare_bracket_mixed_in_one_doc(self) -> None:
+        text = """# Introduction
+
+The model is grounded in TAM [@s007]. Adoption is low [S02].
+"""
+        results = parse_citations(text)
+        assert {c.citation_id for c in results} == {"s007", "S02"}
+
+    def test_non_citation_brackets_ignored(self) -> None:
+        """Numeric refs, figure markers, and prose asides must NOT match."""
+        text = """# Results
+
+See Figure 1 [FIGURE: 1] and the note [see Section 2]. Reference [1] is numeric.
+"""
+        results = parse_citations(text)
+        assert results == []
+
+    def test_order_preserved_across_pandoc_and_bare(self) -> None:
+        text = """# Discussion
+
+First [S05], then [@s002], finally [S09].
+"""
+        results = parse_citations(text)
+        assert [c.citation_id for c in results] == ["S05", "s002", "S09"]
+
     def test_locator_suffix_is_stripped(self) -> None:
         """`[@s007, p. 23]` — the locator (`, p. 23`) is part of the citation, not a new id."""
         text = """# Discussion
