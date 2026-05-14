@@ -246,6 +246,93 @@ class TestCitationGroundingGate:
         assert len(mismatches) == 2
 
 
+class TestDiscussionResultsGate:
+    """IntegrityCheckNode forces FAIL when the Discussion interprets findings the
+    Results section does not contain (Results still `[PENDING:]`)."""
+
+    @staticmethod
+    def _draft(results_content: str, discussion_content: str):
+        """Build a PaperDraft with explicit Results + Discussion sections."""
+        from academic_pipeline.models.shared import Author, Reference
+        from academic_pipeline.models.writing import PaperDraft, Section
+
+        return PaperDraft(
+            title="Test Paper",
+            abstract="Abstract.",
+            authors=[Author(name="Test", affiliation="Lab")],
+            keywords=["k1", "k2", "k3"],
+            sections=[
+                Section(
+                    heading="Results",
+                    level=1,
+                    content=results_content,
+                    word_count=len(results_content.split()),
+                    citation_count=0,
+                ),
+                Section(
+                    heading="Discussion",
+                    level=1,
+                    content=discussion_content,
+                    word_count=len(discussion_content.split()),
+                    citation_count=0,
+                ),
+            ],
+            references=[Reference(id="r1", full_citation="Test (2024).")],
+            total_word_count=20,
+        )
+
+    async def test_fabricated_interpretation_forces_fail(self) -> None:
+        """Agent says PASS, but Discussion narrating empty Results must FAIL."""
+        draft = self._draft(
+            results_content="The correlation was [PENDING: r] (p [PENDING: p]).",
+            discussion_content="The effect size was moderate, tempering optimism.",
+        )
+        state = IntegrityState(paper_draft=draft)
+        deps = make_test_deps()
+        integrity_model = TestModel(
+            custom_output_text=_integrity_json(verdict="PASS", summary="Clean.", report="All good."),
+            call_tools=[],
+        )
+        compliance_model = TestModel(
+            custom_output_text=_json_for_compliance(block_decision="pass", summary="OK."), call_tools=[]
+        )
+        with (
+            _integrity_agents["integrity_verification"].override(model=integrity_model),
+            _integrity_agents["compliance_check"].override(model=compliance_model),
+        ):
+            graph = Graph(nodes=[IntegrityCheckNode, ComplianceCheckNode])
+            await graph.run(IntegrityCheckNode(), state=state, deps=deps)
+
+        assert "FAIL" in str(state.integrity_report.get("verdict"))
+        findings = state.integrity_report.get("discussion_results_findings")
+        assert findings is not None
+        assert len(findings) >= 1
+
+    async def test_populated_results_does_not_force_fail(self) -> None:
+        """Discussion interpreting REAL results must not be flagged."""
+        draft = self._draft(
+            results_content="The correlation was r = 0.42 (p < .001).",
+            discussion_content="The effect size was moderate, consistent with prior work.",
+        )
+        state = IntegrityState(paper_draft=draft)
+        deps = make_test_deps()
+        integrity_model = TestModel(
+            custom_output_text=_integrity_json(verdict="PASS", summary="Clean.", report="All good."),
+            call_tools=[],
+        )
+        compliance_model = TestModel(
+            custom_output_text=_json_for_compliance(block_decision="pass", summary="OK."), call_tools=[]
+        )
+        with (
+            _integrity_agents["integrity_verification"].override(model=integrity_model),
+            _integrity_agents["compliance_check"].override(model=compliance_model),
+        ):
+            graph = Graph(nodes=[IntegrityCheckNode, ComplianceCheckNode])
+            await graph.run(IntegrityCheckNode(), state=state, deps=deps)
+
+        assert "PASS" in str(state.integrity_report.get("verdict"))
+
+
 class TestFailureModeWiring:
     async def test_failure_modes_from_structured_output(self) -> None:
         state = IntegrityState(paper_draft={"title": "Test", "content": "Test paper."})

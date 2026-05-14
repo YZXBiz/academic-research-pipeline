@@ -205,6 +205,26 @@ class IntegrityCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
         pending = [f for f in placeholder_findings if f.severity == "PENDING"]
         scan_report = format_findings_report(placeholder_findings)
 
+        # Layer 4b: deterministic Discussion-vs-Results consistency scan.
+        # Catches a Discussion that interprets quantitative findings while
+        # the Results section is still `[PENDING:]` — narrating results the
+        # paper does not have. Runs on rendered markdown so section headings
+        # are visible to the scanner.
+        from academic_pipeline.integrity.discussion_results_consistency import (
+            format_consistency_report,
+            scan_discussion_results,
+        )
+        from academic_pipeline.models.writing import PaperDraft as _PaperDraft
+
+        if isinstance(draft, _PaperDraft):
+            from academic_pipeline.runtime.paper_renderer import render_markdown
+
+            draft_markdown = render_markdown(draft)
+        else:
+            draft_markdown = draft_text
+        consistency_findings = scan_discussion_results(draft_markdown)
+        consistency_report = format_consistency_report(consistency_findings)
+
         user_prompt = (
             f"Verify the integrity of this paper.\n\n"
             f"Phase: {ctx.state.integrity_phase or 'pre'}\n\n"
@@ -277,9 +297,20 @@ class IntegrityCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
                 len(grounding_mismatches),
             )
 
+        # Discussion-vs-Results consistency gate: a fabricated interpretation
+        # (Discussion narrating findings the Results section lacks) is a hard
+        # FAIL at any phase.
+        if consistency_findings:
+            verdict = Verdict.FAIL
+            logger.warning(
+                "Discussion-Results consistency: %d fabricated-interpretation finding(s) "
+                "— verdict forced to FAIL",
+                len(consistency_findings),
+            )
+
         report_text = output.report or output.summary
         # Append scan results so they appear in the integrity report artifact.
-        report_text = f"{report_text}\n\n{scan_report}"
+        report_text = f"{report_text}\n\n{scan_report}\n\n{consistency_report}"
 
         ctx.state.integrity_report = {
             "raw": report_text,
@@ -297,6 +328,10 @@ class IntegrityCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
                 for f in placeholder_findings
             ],
             "citation_grounding_mismatches": grounding_mismatches,
+            "discussion_results_findings": [
+                {"claim_text": f.claim_text, "line": f.line, "severity": f.severity}
+                for f in consistency_findings
+            ],
         }
         ctx.state.messages.append({"role": "assistant", "content": report_text})
 
