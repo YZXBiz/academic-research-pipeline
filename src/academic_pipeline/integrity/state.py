@@ -7,9 +7,10 @@ from typing import Any, Literal
 
 # Runtime imports — pydantic-graph snapshot serialization needs these at
 # runtime; moving them under TYPE_CHECKING breaks resume.
-from academic_pipeline.models.ethics import EthicsChecklist  # noqa: TCH001
-from academic_pipeline.models.integrity import ComplianceReport  # noqa: TCH001
-from academic_pipeline.models.writing import PaperDraft  # noqa: TCH001
+from academic_pipeline.models.citation_grounding import CitationGroundingReport  # noqa: TC001
+from academic_pipeline.models.ethics import EthicsChecklist  # noqa: TC001
+from academic_pipeline.models.integrity import ComplianceReport  # noqa: TC001
+from academic_pipeline.models.writing import PaperDraft  # noqa: TC001
 
 
 @dataclass
@@ -23,6 +24,12 @@ class IntegrityState:
     messages: list[dict[str, str]] = field(default_factory=list)
     compliance_stage: Literal["2.5", "4.5"] = "2.5"
     compliance_report: ComplianceReport | None = None
+    # Semantic citation-grounding report from the writing subgraph. When it
+    # carries critical mismatches (contradicts/unsupported verdicts),
+    # IntegrityCheckNode forces the verdict to FAIL — mirroring the
+    # deterministic placeholder-scan composition. None for pre-citation-
+    # grounding runs (backward compatible).
+    citation_grounding: CitationGroundingReport | None = None
     # PRD §6.5.T1 — Spec 8 checklist ethics. Populated by EthicsChecklistNode
     # in `integrity/graph.py` when `config.ethics_checklist_enabled=True`.
     # Replaces the legacy freeform research-side EthicsReviewNode (deleted

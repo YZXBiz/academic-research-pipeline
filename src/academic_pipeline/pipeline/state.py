@@ -17,6 +17,9 @@ from academic_pipeline.models.chain import (  # runtime needed for pydantic-grap
     DevelopmentChain,
     ThesisStatement,
 )
+from academic_pipeline.models.citation_grounding import (  # runtime needed for pydantic-graph serialization
+    CitationGroundingReport,
+)
 from academic_pipeline.models.experiment import (  # runtime needed for pydantic-graph serialization
     ExperimentAnalysis,
     ExperimentClassification,
@@ -109,6 +112,9 @@ class PipelineState:
     paper_draft: PaperDraft | None = None
     figure_package: FigurePackage | None = None
     style_profile: StyleProfile | None = None
+    # Semantic citation-grounding report from the writing subgraph. Consumed
+    # by the integrity phase: critical mismatches force an integrity FAIL.
+    citation_grounding: CitationGroundingReport | None = None
 
     # Review handoff data
     review_report: dict[str, Any] = field(default_factory=dict)

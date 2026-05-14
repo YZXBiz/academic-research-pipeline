@@ -254,6 +254,29 @@ class IntegrityCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
                 len(pending),
             )
 
+        # Citation-grounding gate: the writing-phase citation_grounding agent
+        # already made the per-citation semantic judgement. Enforce its
+        # critical mismatches (contradicts/unsupported verdicts) as a hard
+        # FAIL — same deterministic composition as the placeholder scan above.
+        grounding = ctx.state.citation_grounding
+        grounding_mismatches: list[dict[str, str]] = []
+        if grounding is not None and grounding.critical_mismatches:
+            verdict = Verdict.FAIL
+            grounding_mismatches = [
+                {
+                    "citation_id": u.citation_id,
+                    "section": u.section,
+                    "verdict": u.verdict.value,
+                    "claim_text": u.claim_text,
+                    "reasoning": u.reasoning,
+                }
+                for u in grounding.critical_mismatches
+            ]
+            logger.warning(
+                "Citation grounding: %d critical mismatch(es) — verdict forced to FAIL",
+                len(grounding_mismatches),
+            )
+
         report_text = output.report or output.summary
         # Append scan results so they appear in the integrity report artifact.
         report_text = f"{report_text}\n\n{scan_report}"
@@ -273,6 +296,7 @@ class IntegrityCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
                 }
                 for f in placeholder_findings
             ],
+            "citation_grounding_mismatches": grounding_mismatches,
         }
         ctx.state.messages.append({"role": "assistant", "content": report_text})
 

@@ -254,6 +254,43 @@ class TestIntegrityRouting:
 
         assert isinstance(result, IntegrityFixNode)
 
+    async def test_citation_grounding_critical_mismatch_routes_to_fix(self) -> None:
+        """A citation_grounding critical mismatch must route to IntegrityFixNode
+        even when the integrity_verification agent itself returns PASS."""
+        from academic_pipeline.models.citation_grounding import (
+            CitationGroundingReport,
+            CitationUsage,
+            CitationVerdict,
+        )
+
+        grounding = CitationGroundingReport(
+            usages=[
+                CitationUsage(
+                    citation_id="s001",
+                    claim_text="TAM is grounded in [@s001].",
+                    section="Conclusion",
+                    verdict=CitationVerdict.UNSUPPORTED,
+                    reasoning="s001 is Sculley's ML technical-debt paper, not TAM.",
+                    confidence=0.95,
+                ),
+            ],
+            summary="One wrong-source citation.",
+        )
+        state = PipelineState(
+            topic="test",
+            run_id=_unique_run_id(),
+            paper_draft=_make_test_paper_draft(),
+            citation_grounding=grounding,
+        )
+        deps = make_test_deps()
+
+        # Integrity agent says PASS — the citation-grounding gate must still FAIL it.
+        with _override_all_subgraph_agents("Verdict: PASS\n\nAll clear."):
+            node = PreIntegrityNode()
+            result = await node.run(GraphRunContext(state=state, deps=deps))
+
+        assert isinstance(result, IntegrityFixNode)
+
     async def test_max_fixes_forces_review(self) -> None:
         state = PipelineState(
             topic="test",

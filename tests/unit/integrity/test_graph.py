@@ -120,6 +120,132 @@ class TestIntegrityCheckNode:
         assert state.messages[0]["role"] == "assistant"
 
 
+class TestCitationGroundingGate:
+    """IntegrityCheckNode treats citation-grounding critical mismatches as a hard FAIL.
+
+    Mirrors the deterministic placeholder-scan composition: the
+    citation_grounding agent already made the semantic judgement upstream;
+    IntegrityCheckNode just enforces it — even when the integrity_verification
+    LLM says PASS.
+    """
+
+    @staticmethod
+    def _grounding_report(*verdicts: str):
+        """Build a CitationGroundingReport with one usage per given verdict string."""
+        from academic_pipeline.models.citation_grounding import (
+            CitationGroundingReport,
+            CitationUsage,
+            CitationVerdict,
+        )
+
+        usages = [
+            CitationUsage(
+                citation_id=f"s{i:03d}",
+                claim_text=f"Claim {i}.",
+                section="Introduction",
+                verdict=CitationVerdict(v),
+                reasoning="test",
+                confidence=0.9,
+            )
+            for i, v in enumerate(verdicts, 1)
+        ]
+        return CitationGroundingReport(usages=usages, summary="test report")
+
+    async def test_critical_mismatch_forces_fail_over_llm_pass(self) -> None:
+        """Agent says PASS, but a CONTRADICTS citation must force the verdict to FAIL."""
+        state = IntegrityState(
+            paper_draft={"title": "Test", "content": "Test paper."},
+            citation_grounding=self._grounding_report("supports", "contradicts"),
+        )
+        deps = make_test_deps()
+        integrity_model = TestModel(
+            custom_output_text=_integrity_json(verdict="PASS", summary="Clean.", report="All good."),
+            call_tools=[],
+        )
+        compliance_model = TestModel(
+            custom_output_text=_json_for_compliance(block_decision="pass", summary="OK."), call_tools=[]
+        )
+        with (
+            _integrity_agents["integrity_verification"].override(model=integrity_model),
+            _integrity_agents["compliance_check"].override(model=compliance_model),
+        ):
+            graph = Graph(nodes=[IntegrityCheckNode, ComplianceCheckNode])
+            await graph.run(IntegrityCheckNode(), state=state, deps=deps)
+
+        assert "FAIL" in str(state.integrity_report.get("verdict"))
+
+    async def test_all_supports_does_not_force_fail(self) -> None:
+        """All-supports grounding must not override an LLM PASS verdict."""
+        state = IntegrityState(
+            paper_draft={"title": "Test", "content": "Test paper."},
+            citation_grounding=self._grounding_report("supports", "tangential", "supports"),
+        )
+        deps = make_test_deps()
+        integrity_model = TestModel(
+            custom_output_text=_integrity_json(verdict="PASS", summary="Clean.", report="All good."),
+            call_tools=[],
+        )
+        compliance_model = TestModel(
+            custom_output_text=_json_for_compliance(block_decision="pass", summary="OK."), call_tools=[]
+        )
+        with (
+            _integrity_agents["integrity_verification"].override(model=integrity_model),
+            _integrity_agents["compliance_check"].override(model=compliance_model),
+        ):
+            graph = Graph(nodes=[IntegrityCheckNode, ComplianceCheckNode])
+            await graph.run(IntegrityCheckNode(), state=state, deps=deps)
+
+        assert "PASS" in str(state.integrity_report.get("verdict"))
+
+    async def test_none_grounding_is_backward_compatible(self) -> None:
+        """A run with no citation_grounding report behaves exactly as before."""
+        state = IntegrityState(
+            paper_draft={"title": "Test", "content": "Test paper."},
+            citation_grounding=None,
+        )
+        deps = make_test_deps()
+        integrity_model = TestModel(
+            custom_output_text=_integrity_json(verdict="PASS", summary="Clean.", report="All good."),
+            call_tools=[],
+        )
+        compliance_model = TestModel(
+            custom_output_text=_json_for_compliance(block_decision="pass", summary="OK."), call_tools=[]
+        )
+        with (
+            _integrity_agents["integrity_verification"].override(model=integrity_model),
+            _integrity_agents["compliance_check"].override(model=compliance_model),
+        ):
+            graph = Graph(nodes=[IntegrityCheckNode, ComplianceCheckNode])
+            await graph.run(IntegrityCheckNode(), state=state, deps=deps)
+
+        assert "PASS" in str(state.integrity_report.get("verdict"))
+
+    async def test_critical_mismatches_recorded_in_report(self) -> None:
+        """The blocking citation usages must surface in the integrity_report artifact."""
+        state = IntegrityState(
+            paper_draft={"title": "Test", "content": "Test paper."},
+            citation_grounding=self._grounding_report("contradicts", "unsupported"),
+        )
+        deps = make_test_deps()
+        integrity_model = TestModel(
+            custom_output_text=_integrity_json(verdict="PASS", summary="Clean.", report="All good."),
+            call_tools=[],
+        )
+        compliance_model = TestModel(
+            custom_output_text=_json_for_compliance(block_decision="pass", summary="OK."), call_tools=[]
+        )
+        with (
+            _integrity_agents["integrity_verification"].override(model=integrity_model),
+            _integrity_agents["compliance_check"].override(model=compliance_model),
+        ):
+            graph = Graph(nodes=[IntegrityCheckNode, ComplianceCheckNode])
+            await graph.run(IntegrityCheckNode(), state=state, deps=deps)
+
+        mismatches = state.integrity_report.get("citation_grounding_mismatches")
+        assert mismatches is not None
+        assert len(mismatches) == 2
+
+
 class TestFailureModeWiring:
     async def test_failure_modes_from_structured_output(self) -> None:
         state = IntegrityState(paper_draft={"title": "Test", "content": "Test paper."})

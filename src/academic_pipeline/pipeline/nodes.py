@@ -355,6 +355,7 @@ class WritePhaseNode(BaseNode[PipelineState, PipelineDeps, str]):
         ctx.state.paper_outline = final_state.paper_outline
         ctx.state.argument_blueprint = final_state.argument_blueprint
         ctx.state.figure_package = final_state.figure_package
+        ctx.state.citation_grounding = final_state.citation_grounding
         ctx.state.style_profile = final_state.style_profile
         ctx.state.score_history = final_state.score_history
         ctx.state.score_trajectory_flags = final_state.score_trajectory_flags
@@ -576,6 +577,7 @@ class PreIntegrityNode(BaseNode[PipelineState, PipelineDeps, str]):
             paper_draft=ctx.state.paper_draft,
             integrity_phase="pre",
             compliance_stage="2.5",
+            citation_grounding=ctx.state.citation_grounding,
         )
 
         graph = build_integrity_graph()
@@ -694,6 +696,7 @@ class FinalIntegrityNode(BaseNode[PipelineState, PipelineDeps, str]):
             paper_draft=ctx.state.paper_draft,
             integrity_phase="final",
             compliance_stage="4.5",
+            citation_grounding=ctx.state.citation_grounding,
         )
 
         graph = build_integrity_graph()
