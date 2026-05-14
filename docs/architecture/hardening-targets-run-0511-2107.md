@@ -27,9 +27,12 @@ All four hardening bugs are addressed plus the dominant failure class:
   routes the compliance check to PRISMA/CHERRIES/STROBE/CONSORT by detected
   study design.
 
-Infra findings below (timeouts, message serialization, CrossRef) were handled
-in the 2026-05-12/13 commits. The remaining open item is the PydanticAI ↔
-DeepSeek message-serialization 400.
+Infra findings below (timeouts, CrossRef) were handled in the 2026-05-12/13
+commits. The PydanticAI ↔ DeepSeek message-serialization 400 — the bug that
+actually ended run-0511-2107 — is now fixed: `install_deepseek_message_patch`
+in `observability.py` coerces `content=None` to `""` on thinking-only
+assistant turns so DeepSeek's validator accepts them. **All run-0511-2107
+findings are now resolved.**
 
 ## What the gates caught (citation hygiene — strong)
 
