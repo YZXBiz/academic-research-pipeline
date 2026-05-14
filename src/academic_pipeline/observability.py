@@ -86,6 +86,7 @@ def configure_observability() -> None:
     )
 
     install_keepalive_provider_patch()
+    install_deepseek_message_patch()
 
 
 def install_keepalive_provider_patch() -> None:
@@ -124,6 +125,44 @@ def install_keepalive_provider_patch() -> None:
         logger.info("Keepalive provider patch installed (or already present)")
     except ImportError as exc:
         logger.debug("Keepalive provider patch skipped (SDK not installed): %s", exc)
+
+
+def install_deepseek_message_patch() -> None:
+    """Monkey-patch OpenAIChatModel so thinking-only assistant turns are valid for DeepSeek.
+
+    pydantic_ai's ``OpenAIChatModel._into_message_param`` sets ``content = None``
+    for any assistant turn with no ``TextPart`` and no ``ToolCallPart`` — which
+    happens on a thinking-only turn (reasoning went to the ``reasoning_content``
+    field). OpenAI tolerates ``content: null``; DeepSeek's stricter validator
+    rejects it with ``400 invalid_request_error: "Invalid assistant message:
+    content or tool_calls must be set"``. This killed run-0511-2107 in the
+    third pre-integrity round.
+
+    This wraps ``_map_model_response`` so that when the mapped assistant
+    message has ``content is None`` AND no ``tool_calls``, content is coerced
+    to an empty string — satisfying DeepSeek's rule without changing meaning
+    (the reasoning is still carried in ``reasoning_content``). Tool-call-only
+    turns are left untouched: ``tool_calls`` already satisfies the constraint.
+    """
+    try:
+        from pydantic_ai.models.openai import OpenAIChatModel
+
+        if getattr(OpenAIChatModel._map_model_response, "__deepseek_patched__", False):
+            return
+
+        _orig_map = OpenAIChatModel._map_model_response
+
+        def _patched_map_model_response(self: object, message: object) -> object:
+            param = _orig_map(self, message)  # type: ignore[arg-type]
+            if param.get("content") is None and not param.get("tool_calls"):
+                param["content"] = ""
+            return param
+
+        _patched_map_model_response.__deepseek_patched__ = True  # type: ignore[attr-defined]
+        OpenAIChatModel._map_model_response = _patched_map_model_response  # type: ignore[method-assign,assignment]
+        logger.info("DeepSeek empty-message patch installed (or already present)")
+    except ImportError as exc:
+        logger.debug("DeepSeek message patch skipped (pydantic_ai not installed): %s", exc)
 
 
 def shutdown_observability() -> None:
