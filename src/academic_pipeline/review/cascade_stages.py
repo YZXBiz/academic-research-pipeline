@@ -17,6 +17,7 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any
 
+from academic_pipeline.core.enums import PHASE_DIRS, Stage
 from academic_pipeline.models.cascade import (
     CascadeStageName,
     StageResult,
@@ -76,30 +77,25 @@ async def run_numerical_grounding_stage(
 
             agent = _agents.get("numerical_claims_auditor")
             if agent is None:
-                logger.warning(
-                    "Stage A: numerical_claims_auditor agent not registered; "
-                    "falling back to regex check"
-                )
+                logger.warning("Stage A: numerical_claims_auditor agent not registered; falling back to regex check")
             else:
                 from academic_pipeline.runtime.trace_logger import traced_agent_run
 
                 prompt = _build_auditor_prompt(manuscript, store_products)
                 result = await traced_agent_run(
-                    agent, prompt, deps=ctx.deps,
-                    name="numerical_claims_auditor", phase="04-review",
+                    agent,
+                    prompt,
+                    deps=ctx.deps,
+                    name="numerical_claims_auditor",
+                    phase=PHASE_DIRS[Stage.REVIEW],
                 )
                 report = result.output
-                criticals = [
-                    f for f in report.findings if f.severity == "critical"
-                ]
+                criticals = [f for f in report.findings if f.severity == "critical"]
                 if criticals and short_circuit:
                     return StageResult(
                         stage=CascadeStageName.NUMERICAL_GROUNDING,
                         verdict=StageVerdict.SHORT_CIRCUIT_REJECT,
-                        gate_reason=(
-                            f"{len(criticals)} numerical claims not grounded "
-                            f"in trace store (auditor)."
-                        ),
+                        gate_reason=(f"{len(criticals)} numerical claims not grounded in trace store (auditor)."),
                         artifacts={"audit_report": report.model_dump()},
                     )
                 return StageResult(
@@ -109,8 +105,7 @@ async def run_numerical_grounding_stage(
                 )
         except Exception as e:  # CSC002 — infra failure, don't block cascade
             logger.warning(
-                "Stage A: numerical_claims_auditor failed: %s; falling back "
-                "to regex check",
+                "Stage A: numerical_claims_auditor failed: %s; falling back to regex check",
                 e,
             )
 
@@ -121,8 +116,7 @@ async def run_numerical_grounding_stage(
             stage=CascadeStageName.NUMERICAL_GROUNDING,
             verdict=StageVerdict.SHORT_CIRCUIT_REJECT,
             gate_reason=(
-                f"{bare_count} bare numerical values found in prose without "
-                f"⟨num:label⟩ trace tokens (regex fallback)."
+                f"{bare_count} bare numerical values found in prose without ⟨num:label⟩ trace tokens (regex fallback)."
             ),
             artifacts={"bare_number_count": bare_count, "mode": "regex_fallback"},
         )
@@ -163,10 +157,7 @@ async def run_novelty_stage(
         return StageResult(
             stage=CascadeStageName.NOVELTY,
             verdict=StageVerdict.SHORT_CIRCUIT_REJECT,
-            gate_reason=(
-                f"Pointwise novelty rejected: blockers="
-                f"{list(novelty_report.rejection_blockers)}"
-            ),
+            gate_reason=(f"Pointwise novelty rejected: blockers={list(novelty_report.rejection_blockers)}"),
             artifacts={"novelty_report": novelty_report.model_dump()},
         )
 
@@ -225,10 +216,7 @@ async def run_methodology_stage(
         return StageResult(
             stage=CascadeStageName.METHODOLOGY,
             verdict=StageVerdict.SHORT_CIRCUIT_REJECT,
-            gate_reason=(
-                f"Methodology gate rejected by personas: {rejecting} "
-                f"(reject + rejection_grounds finding)."
-            ),
+            gate_reason=(f"Methodology gate rejected by personas: {rejecting} (reject + rejection_grounds finding)."),
             artifacts={"rejecting_personas": rejecting},
         )
 

@@ -18,7 +18,9 @@ from pydantic_graph import BaseNode, End, Graph, GraphRunContext
 
 from academic_pipeline.core.deps import PipelineDeps
 from academic_pipeline.core.enums import (
+    PHASE_DIRS,
     EditorialDecision,  # runtime: used in node body
+    Stage,
 )
 from academic_pipeline.models.cascade import CascadeStageName, StageResult, StageVerdict
 from academic_pipeline.models.novelty_gate import NeighborPaper
@@ -28,7 +30,7 @@ from academic_pipeline.models.novelty_report import (
     ContributionClaim,
 )
 from academic_pipeline.models.persona_review import (
-    PersonaReviewOutput,  # noqa: TCH001 — used at runtime in return-type annotation
+    PersonaReviewOutput,  # noqa: TC001 — used at runtime in return-type annotation
 )
 from academic_pipeline.review.agents import PERSONA_REVIEWER_AGENTS, REVIEWER_AGENTS
 from academic_pipeline.review.agents import agents as _agents
@@ -61,7 +63,7 @@ class FieldAnalystNode(BaseNode[ReviewState, PipelineDeps, str]):
         """Run field analysis on the paper draft and set up reviewer config."""
         context = build_context(ctx.state, ["paper_draft"])
         result = await traced_agent_run(
-            _agents["field_analyst"], context, deps=ctx.deps, name="field_analyst", phase="04-review"
+            _agents["field_analyst"], context, deps=ctx.deps, name="field_analyst", phase=PHASE_DIRS[Stage.REVIEW]
         )
         ctx.state.review_report["field_analysis"] = result.output.model_dump()
         ctx.state.messages.append({"role": "assistant", "content": result.output.review_strategy})
@@ -123,7 +125,7 @@ class ParallelReviewerNode(BaseNode[ReviewState, PipelineDeps, str]):
         context = build_context(ctx.state, ["paper_draft"])
         with ToolManager.parallel_execution_mode("sequential"):
             result = await traced_agent_run(
-                _agents[agent_key], context, deps=ctx.deps, name=agent_key, phase="04-review"
+                _agents[agent_key], context, deps=ctx.deps, name=agent_key, phase=PHASE_DIRS[Stage.REVIEW]
             )
         ctx.state.messages.append(
             {
@@ -145,7 +147,7 @@ class ParallelReviewerNode(BaseNode[ReviewState, PipelineDeps, str]):
         context = build_curated_context(ctx.state, PERSONA_REVIEWER_SPECS[agent_key])
         with ToolManager.parallel_execution_mode("sequential"):
             result = await traced_agent_run(
-                _agents[agent_key], context, deps=ctx.deps, name=agent_key, phase="04-review"
+                _agents[agent_key], context, deps=ctx.deps, name=agent_key, phase=PHASE_DIRS[Stage.REVIEW]
             )
         persona_review: PersonaReviewOutput = result.output
         ctx.state.messages.append(
@@ -251,7 +253,7 @@ class PointWiseNoveltyReviewerNode(BaseNode[ReviewState, PipelineDeps, str]):
                 manuscript,
                 deps=ctx.deps,
                 name="claim_extractor",
-                phase="04-review",
+                phase=PHASE_DIRS[Stage.REVIEW],
             )
             claims: list[ContributionClaim] = list(claims_result.output.claims)
         except Exception as e:  # broad: skip novelty review on extractor failure (PNV002)
@@ -306,7 +308,7 @@ class PointWiseNoveltyReviewerNode(BaseNode[ReviewState, PipelineDeps, str]):
                     assessor_prompt,
                     deps=ctx.deps,
                     name=f"claim_novelty_assessor_{claim.claim_id}",
-                    phase="04-review",
+                    phase=PHASE_DIRS[Stage.REVIEW],
                 )
                 assessments.append(assessment_result.output)
             except Exception as e:
@@ -332,9 +334,7 @@ class PointWiseNoveltyReviewerNode(BaseNode[ReviewState, PipelineDeps, str]):
             ctx.state.messages.append(
                 {
                     "role": "system",
-                    "content": (
-                        f"Point-wise novelty review: REJECT_NOVELTY " f"(blockers: {report.rejection_blockers})"
-                    ),
+                    "content": (f"Point-wise novelty review: REJECT_NOVELTY (blockers: {report.rejection_blockers})"),
                 }
             )
             logger.warning(
@@ -421,7 +421,7 @@ class CascadedReviewNode(BaseNode[ReviewState, PipelineDeps, str]):
         ctx.state.messages.append(
             {
                 "role": "system",
-                "content": (f"Cascaded review complete: " f"verdict={ctx.state.cascade_result.final_verdict}"),
+                "content": (f"Cascaded review complete: verdict={ctx.state.cascade_result.final_verdict}"),
             }
         )
         return EditorialSynthesizerNode()
@@ -460,9 +460,7 @@ class CascadedReviewNode(BaseNode[ReviewState, PipelineDeps, str]):
         ctx.state.messages.append(
             {
                 "role": "system",
-                "content": (
-                    f"Cascaded review SHORT-CIRCUIT REJECT at stage " f"{stage.stage.value}: {stage.gate_reason}"
-                ),
+                "content": (f"Cascaded review SHORT-CIRCUIT REJECT at stage {stage.stage.value}: {stage.gate_reason}"),
             }
         )
 
@@ -485,7 +483,11 @@ class EditorialSynthesizerNode(BaseNode[ReviewState, PipelineDeps, str]):
         # state fields are simply skipped by extract_field_text.
         context = build_curated_context(ctx.state, EDITORIAL_SYNTHESIZER_CONTEXT_SPEC)
         result = await traced_agent_run(
-            _agents["editorial_synthesizer"], context, deps=ctx.deps, name="editorial_synthesizer", phase="04-review"
+            _agents["editorial_synthesizer"],
+            context,
+            deps=ctx.deps,
+            name="editorial_synthesizer",
+            phase=PHASE_DIRS[Stage.REVIEW],
         )
 
         report_text = result.output.report or result.output.summary
@@ -516,7 +518,9 @@ class RevisionCoachingNode(BaseNode[ReviewState, PipelineDeps, str]):
             ctx.state,
             ["paper_draft", "reviewer_reports", "review_report"],
         )
-        result = await traced_agent_run(_agents["eic"], context, deps=ctx.deps, name="eic", phase="04-review")
+        result = await traced_agent_run(
+            _agents["eic"], context, deps=ctx.deps, name="eic", phase=PHASE_DIRS[Stage.REVIEW]
+        )
 
         ctx.state.revision_roadmap = result.output.model_dump()
         ctx.state.messages.append({"role": "assistant", "content": result.output.summary_assessment})

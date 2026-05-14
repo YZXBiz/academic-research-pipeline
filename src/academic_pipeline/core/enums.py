@@ -18,6 +18,22 @@ class Stage(StrEnum):
     SUMMARY = "summary"
 
 
+# Numbered output-directory prefix for each dir-producing stage. Single source
+# of truth — agent `phase=` args and `output/<run>/NN-name/` paths must use
+# these, never inline literals. run-0514 had `02-experiment` and `02-writing`
+# collide because the experiment phase was added without renumbering;
+# tests/unit/core/test_phase_dirs.py guards against that recurring.
+# FINALIZE/SUMMARY finish the run and write no numbered phase dir of their own.
+PHASE_DIRS: dict[Stage, str] = {
+    Stage.RESEARCH: "01-research",
+    Stage.EXPERIMENT: "02-experiment",
+    Stage.WRITE: "03-writing",
+    Stage.PRE_INTEGRITY: "04-integrity",
+    Stage.REVIEW: "05-review",
+    Stage.FINAL_INTEGRITY: "06-final",
+}
+
+
 class PipelineStatus(StrEnum):
     """Top-level lifecycle status of the pipeline run."""
 

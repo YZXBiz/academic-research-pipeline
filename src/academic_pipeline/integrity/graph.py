@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 from pydantic_graph import BaseNode, End, Graph, GraphRunContext
 
 from academic_pipeline.core.deps import PipelineDeps
-from academic_pipeline.core.enums import Verdict
+from academic_pipeline.core.enums import PHASE_DIRS, Stage, Verdict
 from academic_pipeline.integrity.agents import agents as _agents
 from academic_pipeline.integrity.state import IntegrityState
 from academic_pipeline.runtime.trace_logger import traced_agent_run
@@ -106,9 +106,7 @@ class ComplianceCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
         # study-design reporting guideline (PRISMA/CHERRIES/STROBE/CONSORT) is
         # routed separately by build_compliance_prompt so a survey is scored
         # against CHERRIES rather than every item coming back not-applicable.
-        ai_disclosure_checklist = (
-            _PRISMA_CHECKLIST_25 if ctx.state.compliance_stage == "2.5" else _PRISMA_CHECKLIST_45
-        )
+        ai_disclosure_checklist = _PRISMA_CHECKLIST_25 if ctx.state.compliance_stage == "2.5" else _PRISMA_CHECKLIST_45
 
         from academic_pipeline.integrity.reporting_guidelines import build_compliance_prompt
         from academic_pipeline.models.writing import PaperDraft as _PaperDraft
@@ -123,12 +121,14 @@ class ComplianceCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
         else:
             draft_markdown = str(draft)
 
-        prompt = build_compliance_prompt(
-            ai_disclosure_checklist, draft_markdown, ctx.state.compliance_stage
-        )
+        prompt = build_compliance_prompt(ai_disclosure_checklist, draft_markdown, ctx.state.compliance_stage)
 
         result = await traced_agent_run(
-            _agents["compliance_check"], prompt, deps=ctx.deps, name="compliance_check", phase="03-integrity"
+            _agents["compliance_check"],
+            prompt,
+            deps=ctx.deps,
+            name="compliance_check",
+            phase=PHASE_DIRS[Stage.PRE_INTEGRITY],
         )
         report: ComplianceReport = result.output
 
@@ -186,7 +186,7 @@ class EthicsChecklistNode(BaseNode[IntegrityState, PipelineDeps, str]):
             draft_text[:50000],
             deps=ctx.deps,
             name="ethics_review",
-            phase="03-integrity",
+            phase=PHASE_DIRS[Stage.PRE_INTEGRITY],
         )
         checklist = result.output
         ctx.state.ethics_checklist = checklist
@@ -256,7 +256,7 @@ class IntegrityCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
             user_prompt,
             deps=ctx.deps,
             name="integrity_verification",
-            phase="03-integrity",
+            phase=PHASE_DIRS[Stage.PRE_INTEGRITY],
         )
         output = result.output
 
@@ -323,8 +323,7 @@ class IntegrityCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
         if consistency_findings:
             verdict = Verdict.FAIL
             logger.warning(
-                "Discussion-Results consistency: %d fabricated-interpretation finding(s) "
-                "— verdict forced to FAIL",
+                "Discussion-Results consistency: %d fabricated-interpretation finding(s) — verdict forced to FAIL",
                 len(consistency_findings),
             )
 
@@ -349,8 +348,7 @@ class IntegrityCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
             ],
             "citation_grounding_mismatches": grounding_mismatches,
             "discussion_results_findings": [
-                {"claim_text": f.claim_text, "line": f.line, "severity": f.severity}
-                for f in consistency_findings
+                {"claim_text": f.claim_text, "line": f.line, "severity": f.severity} for f in consistency_findings
             ],
         }
         ctx.state.messages.append({"role": "assistant", "content": report_text})

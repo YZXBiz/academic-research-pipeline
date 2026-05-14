@@ -19,7 +19,9 @@ from pydantic_graph import BaseNode, End, Graph, GraphRunContext
 
 from academic_pipeline.core.deps import PipelineDeps
 from academic_pipeline.core.enums import (
+    PHASE_DIRS,
     EditorialDecision,
+    Stage,
 )
 from academic_pipeline.models.research import IndependentVerificationReport
 from academic_pipeline.research.agents import agents as _agents
@@ -140,7 +142,11 @@ class ResearchQuestionNode(BaseNode[ResearchState, PipelineDeps, str]):
         """Generate the research question brief from the topic."""
         context = build_context(ctx.state, ["topic"], node_name="ResearchQuestionNode")
         result = await traced_agent_run(
-            _agents["research_question"], context, deps=ctx.deps, name="research_question", phase="01-research"
+            _agents["research_question"],
+            context,
+            deps=ctx.deps,
+            name="research_question",
+            phase=PHASE_DIRS[Stage.RESEARCH],
         )
         ctx.state.rq_brief = result.output
         ctx.state.messages.append({"role": "assistant", "content": result.output.model_dump_json()})
@@ -155,7 +161,11 @@ class ResearchArchitectNode(BaseNode[ResearchState, PipelineDeps, str]):
         """Generate the methodology blueprint from the RQ brief."""
         context = build_context(ctx.state, ["topic", "rq_brief"], node_name="ResearchArchitectNode")
         result = await traced_agent_run(
-            _agents["research_architect"], context, deps=ctx.deps, name="research_architect", phase="01-research"
+            _agents["research_architect"],
+            context,
+            deps=ctx.deps,
+            name="research_architect",
+            phase=PHASE_DIRS[Stage.RESEARCH],
         )
         ctx.state.methodology_blueprint = result.output
         ctx.state.messages.append({"role": "assistant", "content": result.output.model_dump_json(indent=2)})
@@ -173,7 +183,7 @@ class BibliographyNode(BaseNode[ResearchState, PipelineDeps, str]):
         context = build_context(ctx.state, ["topic", "rq_brief", "methodology_blueprint"], node_name="BibliographyNode")
         with ToolManager.parallel_execution_mode("sequential"):
             result = await traced_agent_run(
-                _agents["bibliography"], context, deps=ctx.deps, name="bibliography", phase="01-research"
+                _agents["bibliography"], context, deps=ctx.deps, name="bibliography", phase=PHASE_DIRS[Stage.RESEARCH]
             )
         ctx.state.bibliography = result.output
 
@@ -205,7 +215,11 @@ class SourceVerificationNode(BaseNode[ResearchState, PipelineDeps, str]):
         """
         context = build_context(ctx.state, ["bibliography"])
         result = await traced_agent_run(
-            _agents["source_verification"], context, deps=ctx.deps, name="source_verification", phase="01-research"
+            _agents["source_verification"],
+            context,
+            deps=ctx.deps,
+            name="source_verification",
+            phase=PHASE_DIRS[Stage.RESEARCH],
         )
         ctx.state.review_report["source_verification"] = result.output.model_dump()
         ctx.state.messages.append({"role": "assistant", "content": str(result.output)})
@@ -254,7 +268,7 @@ class SynthesisNode(BaseNode[ResearchState, PipelineDeps, str]):
             fields = ["rq_brief", "bibliography", "methodology_blueprint"]
         context = build_context(ctx.state, fields, node_name="SynthesisNode")
         result = await traced_agent_run(
-            _agents["synthesis"], context, deps=ctx.deps, name="synthesis", phase="01-research"
+            _agents["synthesis"], context, deps=ctx.deps, name="synthesis", phase=PHASE_DIRS[Stage.RESEARCH]
         )
         ctx.state.synthesis = result.output
         ctx.state.messages.append({"role": "assistant", "content": str(result.output)})
@@ -287,7 +301,7 @@ class ChainOfIdeasNode(BaseNode[ResearchState, PipelineDeps, str]):
             chain_context,
             deps=ctx.deps,
             name="chain_of_ideas_extractor",
-            phase="01-research",
+            phase=PHASE_DIRS[Stage.RESEARCH],
         )
         ctx.state.chain = chain_result.output
         ctx.state.messages.append({"role": "assistant", "content": chain_result.output.model_dump_json(indent=2)})
@@ -304,7 +318,7 @@ class ChainOfIdeasNode(BaseNode[ResearchState, PipelineDeps, str]):
             thesis_context,
             deps=ctx.deps,
             name="thesis_extractor",
-            phase="01-research",
+            phase=PHASE_DIRS[Stage.RESEARCH],
         )
         ctx.state.thesis = thesis_result.output
         ctx.state.messages.append({"role": "assistant", "content": thesis_result.output.model_dump_json(indent=2)})
@@ -323,7 +337,7 @@ class ReportCompilerNode(BaseNode[ResearchState, PipelineDeps, str]):
             node_name="ReportCompilerNode",
         )
         result = await traced_agent_run(
-            _agents["report_compiler"], context, deps=ctx.deps, name="report_compiler", phase="01-research"
+            _agents["report_compiler"], context, deps=ctx.deps, name="report_compiler", phase=PHASE_DIRS[Stage.RESEARCH]
         )
         ctx.state.review_report = result.output.model_dump()
         ctx.state.messages.append({"role": "assistant", "content": str(result.output)})
@@ -345,7 +359,7 @@ class CrossModelVerificationNode(BaseNode[ResearchState, PipelineDeps, str]):
                 context,
                 deps=ctx.deps,
                 name="independent_verifier",
-                phase="01-research",
+                phase=PHASE_DIRS[Stage.RESEARCH],
             )
             ctx.state.independent_verification_report = result.output
             ctx.state.messages.append({"role": "assistant", "content": result.output.overall_assessment})
@@ -377,7 +391,7 @@ class EditorInChiefNode(BaseNode[ResearchState, PipelineDeps, str]):
         """
         context = build_context(ctx.state, ["review_report"])
         result = await traced_agent_run(
-            _agents["editor_in_chief"], context, deps=ctx.deps, name="editor_in_chief", phase="01-research"
+            _agents["editor_in_chief"], context, deps=ctx.deps, name="editor_in_chief", phase=PHASE_DIRS[Stage.RESEARCH]
         )
         review: EditorReview = result.output
         ctx.state.eic_review_structured = review

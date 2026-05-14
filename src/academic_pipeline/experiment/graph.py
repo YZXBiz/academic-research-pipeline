@@ -16,6 +16,7 @@ from pathlib import Path
 from pydantic_graph import BaseNode, End, Graph, GraphRunContext
 
 from academic_pipeline.core.deps import PipelineDeps
+from academic_pipeline.core.enums import PHASE_DIRS, Stage
 from academic_pipeline.experiment.agents import agents as _agents
 from academic_pipeline.experiment.context_specs import RESULT_ANALYZER_CONTEXT_SPEC
 from academic_pipeline.experiment.state import ExperimentState
@@ -184,7 +185,7 @@ class ExperimentDesignNode(BaseNode[ExperimentState, PipelineDeps, str]):
             rubric=_RUBRIC_DESIGN,
             deps=ctx.deps,
             name="experiment_designer",
-            phase="02-experiment",
+            phase=PHASE_DIRS[Stage.EXPERIMENT],
         )
         ctx.state.plan = result.output
         ctx.state.messages.append({"role": "assistant", "content": "Experiment plan created."})
@@ -220,7 +221,7 @@ class ExperimentDesignBundleNode(BaseNode[ExperimentState, PipelineDeps, str]):
             context,
             deps=ctx.deps,
             name="experiment_designer_bundle",
-            phase="02-experiment",
+            phase=PHASE_DIRS[Stage.EXPERIMENT],
         )
         bundle = result.output
         if not isinstance(bundle, DesignBundle):
@@ -265,7 +266,7 @@ class DesignSelectionNode(BaseNode[ExperimentState, PipelineDeps, str]):
                 ctx_text,
                 deps=ctx.deps,
                 name="design_scorer",
-                phase="02-experiment",
+                phase=PHASE_DIRS[Stage.EXPERIMENT],
             )
             score_out = score_result.output
             if not isinstance(score_out, DesignScore):
@@ -333,7 +334,7 @@ class DesignComparisonNode(BaseNode[ExperimentState, PipelineDeps, str]):
             ctx_text,
             deps=ctx.deps,
             name="design_comparator",
-            phase="02-experiment",
+            phase=PHASE_DIRS[Stage.EXPERIMENT],
         )
         comparison = result.output
         if not isinstance(comparison, DesignComparison):
@@ -430,7 +431,7 @@ class InteractiveMLNode(BaseNode[ExperimentState, PipelineDeps, str]):
         else:
             run_id = str(uuid.uuid4())[:8]
             if ctx.deps.trace_logger:
-                local_root = str((ctx.deps.trace_logger.output_dir / "02-experiment").resolve())
+                local_root = str((ctx.deps.trace_logger.output_dir / PHASE_DIRS[Stage.EXPERIMENT]).resolve())
             else:
                 local_root = os.getcwd()
             config = DockerConfig(
@@ -444,7 +445,7 @@ class InteractiveMLNode(BaseNode[ExperimentState, PipelineDeps, str]):
         # 1b. Set up message cache for conversation resume
         trace_logger = ctx.deps.trace_logger
         if trace_logger:
-            cache_dir = str(trace_logger.output_dir / "02-experiment" / "cache")
+            cache_dir = str(trace_logger.output_dir / PHASE_DIRS[Stage.EXPERIMENT] / "cache")
         else:
             cache_dir = str(Path("output/latest/02-experiment/cache").resolve())
         cache = AgentMessageCache(cache_dir=cache_dir, agent_name="ml_engineer")
@@ -467,7 +468,7 @@ class InteractiveMLNode(BaseNode[ExperimentState, PipelineDeps, str]):
                 context,
                 deps=ctx.deps,
                 name="ml_engineer",
-                phase="02-experiment",
+                phase=PHASE_DIRS[Stage.EXPERIMENT],
                 message_history=prior_messages,
             )
         except Exception as e:
@@ -535,7 +536,7 @@ class InteractiveMLNode(BaseNode[ExperimentState, PipelineDeps, str]):
 
         # 6. Collect artifacts into structured output directory
         try:
-            experiment_output_dir = Path("output") / "latest" / "02-experiment"
+            experiment_output_dir = Path("output") / "latest" / PHASE_DIRS[Stage.EXPERIMENT]
             experiment_output_dir.mkdir(parents=True, exist_ok=True)
             _collect_experiment_artifacts(env, ctx.state, experiment_output_dir)
         except Exception as e:
@@ -586,7 +587,7 @@ class JudgeNode(BaseNode[ExperimentState, PipelineDeps, str]):
                 context,
                 deps=ctx.deps,
                 name="experiment_judge",
-                phase="02-experiment",
+                phase=PHASE_DIRS[Stage.EXPERIMENT],
             )
         except Exception as e:
             logger.error("Judge agent failed: %s", e)
@@ -599,7 +600,7 @@ class JudgeNode(BaseNode[ExperimentState, PipelineDeps, str]):
         if isinstance(verdict, JudgeVerdict):
             # Save judge verdict as artifact
             try:
-                judge_artifacts = Path("output") / "latest" / "02-experiment" / "artifacts"
+                judge_artifacts = Path("output") / "latest" / PHASE_DIRS[Stage.EXPERIMENT] / "artifacts"
                 judge_artifacts.mkdir(parents=True, exist_ok=True)
                 (judge_artifacts / "judge_verdict.json").write_text(verdict.model_dump_json(indent=2))
             except Exception as e:
@@ -647,7 +648,7 @@ class ConfigWriterNode(BaseNode[ExperimentState, PipelineDeps, str]):
         out_root = (
             Path(getattr(ctx.deps.config, "output_dir", None) or "output")
             / (ctx.state.run_id or "unknown-run")
-            / "02-experiment"
+            / PHASE_DIRS[Stage.EXPERIMENT]
         )
         workspace = out_root / "workspace"
         workspace.mkdir(parents=True, exist_ok=True)
@@ -668,7 +669,7 @@ class ConfigWriterNode(BaseNode[ExperimentState, PipelineDeps, str]):
             agent_ctx,
             deps=ctx.deps,
             name="config_writer",
-            phase="02-experiment",
+            phase=PHASE_DIRS[Stage.EXPERIMENT],
         )
         bundle = result.output
         if not isinstance(bundle, WorkspaceFiles):
@@ -791,7 +792,7 @@ class AnalysisNode(BaseNode[ExperimentState, PipelineDeps, str]):
             rubric=_RUBRIC_ANALYSIS,
             deps=ctx.deps,
             name="result_analyzer",
-            phase="02-experiment",
+            phase=PHASE_DIRS[Stage.EXPERIMENT],
         )
         ctx.state.analysis = result.output
         ctx.state.messages.append({"role": "assistant", "content": "Analysis complete."})

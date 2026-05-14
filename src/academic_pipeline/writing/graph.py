@@ -20,6 +20,7 @@ from typing import Any
 from pydantic_graph import BaseNode, End, Graph, GraphRunContext
 
 from academic_pipeline.core.deps import PipelineDeps
+from academic_pipeline.core.enums import PHASE_DIRS, Stage
 from academic_pipeline.models.writing import (  # runtime: used in node type hints
     PaperConfig,
     Section,
@@ -203,7 +204,9 @@ class IntakeNode(BaseNode[WritingState, PipelineDeps, str]):
     ) -> LiteratureStrategistNode | StructureArchitectNode:
         """Analyze the topic and route based on bibliography presence."""
         context = build_context(ctx.state, ["topic", "rq_brief", "synthesis"])
-        result = await traced_agent_run(_agents["intake"], context, deps=ctx.deps, name="intake", phase="02-writing")
+        result = await traced_agent_run(
+            _agents["intake"], context, deps=ctx.deps, name="intake", phase=PHASE_DIRS[Stage.WRITE]
+        )
 
         # Preserve any CLI-provided authors when the intake agent overwrites paper_config.
         cli_authors = ctx.state.paper_config.authors if ctx.state.paper_config else []
@@ -233,7 +236,11 @@ class LiteratureStrategistNode(BaseNode[WritingState, PipelineDeps, str]):
         """Analyze bibliography and produce a literature integration plan."""
         context = build_context(ctx.state, ["topic", "bibliography", "synthesis"])
         result = await traced_agent_run(
-            _agents["literature_strategist"], context, deps=ctx.deps, name="literature_strategist", phase="02-writing"
+            _agents["literature_strategist"],
+            context,
+            deps=ctx.deps,
+            name="literature_strategist",
+            phase=PHASE_DIRS[Stage.WRITE],
         )
         ctx.state.literature_strategy = result.output.model_dump()
         ctx.state.messages.append({"role": "assistant", "content": result.output.model_dump_json(indent=2)})
@@ -256,7 +263,7 @@ class StructureArchitectNode(BaseNode[WritingState, PipelineDeps, str]):
             rubric=_RUBRIC_STRUCTURE,
             deps=ctx.deps,
             name="structure_architect",
-            phase="02-writing",
+            phase=PHASE_DIRS[Stage.WRITE],
         )
         ctx.state.paper_outline = result.output
         ctx.state.messages.append({"role": "assistant", "content": result.output.model_dump_json(indent=2)})
@@ -279,7 +286,7 @@ class ArgumentBuilderNode(BaseNode[WritingState, PipelineDeps, str]):
             rubric=_RUBRIC_ARGUMENT,
             deps=ctx.deps,
             name="argument_builder",
-            phase="02-writing",
+            phase=PHASE_DIRS[Stage.WRITE],
         )
         ctx.state.argument_blueprint = result.output
         ctx.state.messages.append({"role": "assistant", "content": result.output.model_dump_json(indent=2)})
@@ -378,7 +385,7 @@ class ParallelSectionDraftNode(BaseNode[WritingState, PipelineDeps, str]):
                 rubric=_RUBRIC_SECTION_DRAFT,
                 deps=ctx.deps,
                 name=f"section_writer_{spec.heading.replace(' ', '_').lower()[:30]}",
-                phase="02-writing",
+                phase=PHASE_DIRS[Stage.WRITE],
                 traceability_context=_build_traceability_context(ctx.state),
                 hard_vetos=_SECTION_VETOS,
             )
@@ -522,7 +529,7 @@ class DraftWriterNode(BaseNode[WritingState, PipelineDeps, str]):
             rubric=_RUBRIC_DRAFT,
             deps=ctx.deps,
             name="draft_writer",
-            phase="02-writing",
+            phase=PHASE_DIRS[Stage.WRITE],
             hard_vetos=_SECTION_VETOS,
         )
         ctx.state.paper_draft = result.output
@@ -543,7 +550,7 @@ class CitationComplianceNode(BaseNode[WritingState, PipelineDeps, str]):
             rubric=_RUBRIC_CITATION,
             deps=ctx.deps,
             name="citation_compliance",
-            phase="02-writing",
+            phase=PHASE_DIRS[Stage.WRITE],
         )
         ctx.state.citation_audit = result.output.model_dump()
         ctx.state.messages.append({"role": "assistant", "content": result.output.model_dump_json(indent=2)})
@@ -560,7 +567,7 @@ class ParallelAbstractVizNode(BaseNode[WritingState, PipelineDeps, str]):
         async def _run_abstract() -> None:
             context = build_context(ctx.state, ["paper_draft", "rq_brief", "topic"])
             result = await traced_agent_run(
-                _agents["abstract"], context, deps=ctx.deps, name="abstract", phase="02-writing"
+                _agents["abstract"], context, deps=ctx.deps, name="abstract", phase=PHASE_DIRS[Stage.WRITE]
             )
             ctx.state.abstract_result = result.output.model_dump()
             ctx.state.messages.append({"role": "assistant", "content": result.output.abstract_text})
@@ -583,13 +590,13 @@ class ParallelAbstractVizNode(BaseNode[WritingState, PipelineDeps, str]):
             )
 
             base_context = build_context(ctx.state, ["paper_draft", "paper_outline"])
-            context = f"available_figures:\n{inventory_block}\n\n" f"{base_context}"
+            context = f"available_figures:\n{inventory_block}\n\n{base_context}"
             result = await traced_agent_run(
                 _agents["visualization"],
                 context,
                 deps=ctx.deps,
                 name="visualization",
-                phase="02-writing",
+                phase=PHASE_DIRS[Stage.WRITE],
             )
             ctx.state.figure_package = result.output
             ctx.state.messages.append({"role": "assistant", "content": result.output.model_dump_json(indent=2)})
@@ -643,7 +650,7 @@ class MergePhase5Node(BaseNode[WritingState, PipelineDeps, str]):
         fig = ctx.state.figure_package
         figure_text = fig.model_dump_json(indent=2) if fig is not None else ""
 
-        merged = f"Abstract:\n{abstract_text}\n\n" f"Draft:\n{draft_text}\n\n" f"Figures:\n{figure_text}"
+        merged = f"Abstract:\n{abstract_text}\n\nDraft:\n{draft_text}\n\nFigures:\n{figure_text}"
         ctx.state.internal_review = merged
         ctx.state.messages.append(
             {
@@ -721,7 +728,7 @@ class CitationGroundingNode(BaseNode[WritingState, PipelineDeps, str]):
             context,
             deps=ctx.deps,
             name="citation_grounding",
-            phase="02-writing",
+            phase=PHASE_DIRS[Stage.WRITE],
         )
         ctx.state.citation_grounding = result.output
         ctx.state.messages.append({"role": "assistant", "content": result.output.summary})
@@ -739,7 +746,7 @@ class FigureVerificationNode(BaseNode[WritingState, PipelineDeps, str]):
             return PeerReviewerNode()
         context = build_context(ctx.state, ["figure_package"], node_name="FigureVerificationNode")
         result = await traced_agent_run(
-            _agents["figure_verifier"], context, deps=ctx.deps, name="figure_verifier", phase="02-writing"
+            _agents["figure_verifier"], context, deps=ctx.deps, name="figure_verifier", phase=PHASE_DIRS[Stage.WRITE]
         )
         ctx.state.figure_verification = result.output
         ctx.state.messages.append({"role": "assistant", "content": result.output.summary})
@@ -756,7 +763,7 @@ class PeerReviewerNode(BaseNode[WritingState, PipelineDeps, str]):
             ctx.state, ["paper_draft", "internal_review", "citation_audit", "abstract_result"]
         )
         result = await traced_agent_run(
-            _agents["peer_reviewer"], context, deps=ctx.deps, name="peer_reviewer", phase="02-writing"
+            _agents["peer_reviewer"], context, deps=ctx.deps, name="peer_reviewer", phase=PHASE_DIRS[Stage.WRITE]
         )
         report_text = result.output.report or result.output.summary
         ctx.state.internal_review = report_text
@@ -794,7 +801,7 @@ class FormatterNode(BaseNode[WritingState, PipelineDeps, str]):
             rubric=_RUBRIC_FORMATTER,
             deps=ctx.deps,
             name="formatter",
-            phase="02-writing",
+            phase=PHASE_DIRS[Stage.WRITE],
         )
         ctx.state.formatted_output = result.output.model_dump()
         ctx.state.messages.append({"role": "assistant", "content": result.output.formatted_content})

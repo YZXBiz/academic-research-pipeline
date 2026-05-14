@@ -23,6 +23,7 @@ from pydantic_graph import BaseNode, End, Graph, GraphRunContext
 
 from academic_pipeline.core.deps import PipelineDeps
 from academic_pipeline.core.enums import (
+    PHASE_DIRS,
     PipelineStatus,
     Stage,
     Verdict,
@@ -116,7 +117,7 @@ async def _run_subgraph_with_persistence(
         )
         if completed_end is not None and not has_created_node:
             logger.info(
-                "%s subgraph already complete — returning final state from end snapshot " "(run_id=%s_%s)",
+                "%s subgraph already complete — returning final state from end snapshot (run_id=%s_%s)",
                 subgraph_name,
                 run_id,
                 subgraph_name,
@@ -410,7 +411,7 @@ class ExperimentClassifierNode(BaseNode[PipelineState, PipelineDeps, str]):
             context,
             deps=ctx.deps,
             name="experiment_classifier",
-            phase="02-experiment",
+            phase=PHASE_DIRS[Stage.EXPERIMENT],
         )
         ctx.state.experiment_classification = result.output
         ctx.deps.predictor_type = result.output.predictor_type

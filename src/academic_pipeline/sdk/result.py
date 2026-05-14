@@ -6,16 +6,18 @@ import json
 from pathlib import Path
 from typing import Any
 
+from academic_pipeline.core.enums import PHASE_DIRS, Stage
+
 
 _PHASE_ARTIFACTS: dict[str, list[tuple[str, str]]] = {
-    "01-research": [
+    PHASE_DIRS[Stage.RESEARCH]: [
         ("rq_brief", "md"),
         ("methodology_blueprint", "json"),
         ("bibliography", "md"),
         # PRD §6.1.T7 — knowledge_graph artifact removed (model + node deleted).
         ("synthesis", "md"),
     ],
-    "02-writing": [
+    PHASE_DIRS[Stage.WRITE]: [
         ("paper_outline", "json"),
         ("argument_blueprint", "json"),
         ("paper_draft", "md"),
@@ -23,15 +25,15 @@ _PHASE_ARTIFACTS: dict[str, list[tuple[str, str]]] = {
         ("style_profile", "json"),
         ("score_history", "json"),
     ],
-    "03-integrity": [
+    PHASE_DIRS[Stage.PRE_INTEGRITY]: [
         ("integrity_report", "json"),
         ("compliance_reports", "json"),
     ],
-    "04-review": [
+    PHASE_DIRS[Stage.REVIEW]: [
         ("review_report", "json"),
         ("revision_roadmap", "md"),
     ],
-    "05-final": [
+    PHASE_DIRS[Stage.FINAL_INTEGRITY]: [
         ("material_passport", "json"),
     ],
 }
@@ -199,19 +201,19 @@ class PipelineResult:
         # LaTeX artifacts + PDF
         latex_source = self._state.get("latex_source", "")
         if latex_source:
-            latex_dir = out / "02-writing" / "artifacts"
+            latex_dir = out / PHASE_DIRS[Stage.WRITE] / "artifacts"
             latex_dir.mkdir(parents=True, exist_ok=True)
             (latex_dir / "paper.tex").write_text(latex_source, encoding="utf-8")
 
         bib_source = self._state.get("bib_source", "")
         if bib_source:
-            latex_dir = out / "02-writing" / "artifacts"
+            latex_dir = out / PHASE_DIRS[Stage.WRITE] / "artifacts"
             latex_dir.mkdir(parents=True, exist_ok=True)
             (latex_dir / "references.bib").write_text(bib_source, encoding="utf-8")
 
         pdf_bytes = self._state.get("pdf_bytes", b"")
         if pdf_bytes:
-            pdf_dir = out / "02-writing" / "artifacts"
+            pdf_dir = out / PHASE_DIRS[Stage.WRITE] / "artifacts"
             pdf_dir.mkdir(parents=True, exist_ok=True)
             (pdf_dir / "paper.pdf").write_bytes(pdf_bytes)
 
