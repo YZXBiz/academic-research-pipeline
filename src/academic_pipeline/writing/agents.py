@@ -13,6 +13,7 @@ from pydantic_ai.models.anthropic import AnthropicCompaction
 
 from academic_pipeline.config import DEFAULT_CONFIG
 from academic_pipeline.core.deps import PipelineDeps
+from academic_pipeline.models.citation_grounding import CitationGroundingReport
 from academic_pipeline.models.review import (
     FigureVerificationReport,
     PeerReviewOutput,
@@ -79,6 +80,12 @@ agents: dict[str, Agent[PipelineDeps, Any]] = {
         output_type=PromptedOutput(CitationAudit),
         capabilities=[throttle_hooks, _COMPACTION],  # pyright: ignore[reportArgumentType]
         tools=[format_citation, validate_citation, convert_citation_style],
+    ),
+    "citation_grounding": Agent.from_file(
+        _AGENTS_DIR / "citation_grounding.yaml",
+        deps_type=PipelineDeps,
+        output_type=PromptedOutput(CitationGroundingReport),
+        capabilities=[throttle_hooks, _COMPACTION],  # pyright: ignore[reportArgumentType]
     ),
     "abstract": Agent.from_file(
         _AGENTS_DIR / "abstract.yaml",

@@ -60,6 +60,7 @@ def _mock_authors_gate():
         yield
 
 
+from academic_pipeline.models.citation_grounding import CitationGroundingReport
 from academic_pipeline.models.research import (
     Bibliography,
     PRISMACounts,
@@ -185,6 +186,7 @@ _STRUCTURED_AGENT_MODELS: dict[str, type] = {
     "visualization": FigurePackage,
     "section_writer": Section,
     "figure_verifier": FigureVerificationReport,
+    "citation_grounding": CitationGroundingReport,
 }
 
 _STRUCTURED_AGENTS = set(_STRUCTURED_AGENT_MODELS)
@@ -224,6 +226,7 @@ def _all_node_classes() -> list[type]:
         ArgumentBuilderNode,
         BibTexGeneratorNode,
         CitationComplianceNode,
+        CitationGroundingNode,
         DraftWriterNode,
         FigureVerificationNode,
         FormatterNode,
@@ -251,6 +254,7 @@ def _all_node_classes() -> list[type]:
         CitationComplianceNode,
         ParallelAbstractVizNode,
         MergePhase5Node,
+        CitationGroundingNode,
         FigureVerificationNode,
         PeerReviewerNode,
         FormatterNode,
@@ -374,6 +378,112 @@ class TestLinearNodes:
 
         assert state.citation_audit != {}
         assert len(state.messages) >= 1
+
+
+class TestCitationGroundingNode:
+    """CitationGroundingNode semantically verifies each citation against its source."""
+
+    async def test_merge_phase5_routes_to_citation_grounding(self) -> None:
+        """MergePhase5Node must hand off to CitationGroundingNode, not straight to figures."""
+        from academic_pipeline.writing.graph import (
+            CitationGroundingNode,
+            MergePhase5Node,
+        )
+
+        state = WritingState(
+            topic="AI in education",
+            paper_draft=_make_test_paper_draft(),
+            bibliography=_make_test_bibliography(),
+        )
+        deps = make_test_deps()
+
+        with _override_all():
+            node = MergePhase5Node()
+            next_node = await node.run(GraphRunContext(state=state, deps=deps))
+
+        assert isinstance(next_node, CitationGroundingNode)
+
+    async def test_citation_grounding_routes_to_figure_verification(self) -> None:
+        from academic_pipeline.writing.graph import (
+            CitationGroundingNode,
+            FigureVerificationNode,
+        )
+
+        state = WritingState(
+            topic="AI in education",
+            paper_draft=_make_test_paper_draft(),
+            bibliography=_make_test_bibliography(),
+        )
+        deps = make_test_deps()
+
+        with _override_all():
+            node = CitationGroundingNode()
+            next_node = await node.run(GraphRunContext(state=state, deps=deps))
+
+        assert isinstance(next_node, FigureVerificationNode)
+
+    async def test_citation_grounding_populates_state(self) -> None:
+        """After running, state.citation_grounding holds a CitationGroundingReport.
+
+        Uses a draft that actually cites a source the bibliography contains —
+        otherwise the node correctly skips (nothing to ground).
+        """
+        from academic_pipeline.models.citation_grounding import CitationGroundingReport
+        from academic_pipeline.models.shared import Author, Reference
+        from academic_pipeline.models.writing import PaperDraft, Section
+        from academic_pipeline.writing.graph import CitationGroundingNode
+
+        cited_draft = PaperDraft(
+            title="Test",
+            abstract="Test abstract.",
+            authors=[Author(name="Test", affiliation="Test")],
+            keywords=["k1", "k2", "k3"],
+            sections=[
+                Section(
+                    heading="Introduction",
+                    level=1,
+                    content="Prior work establishes the baseline [@S1].",
+                    word_count=6,
+                    citation_count=1,
+                ),
+            ],
+            references=[Reference(id="ref1", full_citation="Test (2024).")],
+            total_word_count=6,
+        )
+        state = WritingState(
+            topic="AI in education",
+            paper_draft=cited_draft,
+            bibliography=_make_test_bibliography(),
+        )
+        deps = make_test_deps()
+
+        with _override_all():
+            node = CitationGroundingNode()
+            await node.run(GraphRunContext(state=state, deps=deps))
+
+        assert isinstance(state.citation_grounding, CitationGroundingReport)
+        assert len(state.messages) >= 1
+
+    async def test_citation_grounding_skips_gracefully_without_bibliography(self) -> None:
+        """No bibliography = nothing to ground against. Route forward, don't crash."""
+        from academic_pipeline.writing.graph import (
+            CitationGroundingNode,
+            FigureVerificationNode,
+        )
+
+        state = WritingState(
+            topic="AI in education",
+            paper_draft=_make_test_paper_draft(),
+            bibliography=None,
+        )
+        deps = make_test_deps()
+
+        with _override_all():
+            node = CitationGroundingNode()
+            next_node = await node.run(GraphRunContext(state=state, deps=deps))
+
+        assert isinstance(next_node, FigureVerificationNode)
+        assert state.citation_grounding is None
 
 
 class TestSectionPlannerNode:

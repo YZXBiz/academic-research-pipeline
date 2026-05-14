@@ -34,6 +34,11 @@ from academic_pipeline.runtime.hard_vetos import (
 from academic_pipeline.runtime.trace_logger import traced_agent_run
 from academic_pipeline.runtime.validators import validate_state  # runtime: used in DraftWriterNode
 from academic_pipeline.writing.agents import agents as _agents
+from academic_pipeline.writing.citation_grounding import (
+    GroundingPair,
+    build_grounding_pairs,
+    parse_citations,
+)
 from academic_pipeline.writing.context_specs import (
     DRAFT_WRITER_CONTEXT_SPEC,
     SECTION_WRITER_CONTEXT_SPEC,
@@ -597,7 +602,7 @@ class ParallelAbstractVizNode(BaseNode[WritingState, PipelineDeps, str]):
 class MergePhase5Node(BaseNode[WritingState, PipelineDeps, str]):
     """Merge abstract, visualization, and draft into the review-ready paper."""
 
-    async def run(self, ctx: GraphRunContext[WritingState, PipelineDeps]) -> FigureVerificationNode:
+    async def run(self, ctx: GraphRunContext[WritingState, PipelineDeps]) -> CitationGroundingNode:
         """Merge all writing artifacts before peer review."""
         # Extract abstract text
         abstract_text = ""
@@ -646,6 +651,80 @@ class MergePhase5Node(BaseNode[WritingState, PipelineDeps, str]):
                 "content": "Phase 5 merge complete. Draft ready for peer review.",
             }
         )
+        return CitationGroundingNode()
+
+
+def _reconstruct_paper_markdown(draft: Any) -> str:
+    """Rebuild section-headed Markdown from a PaperDraft.
+
+    The citation parser needs `# Heading` lines to track which section each
+    `[@sNNN]` appears under; PaperDraft stores heading and content separately.
+    """
+    parts: list[str] = []
+    for section in draft.sections:
+        hashes = "#" * max(1, min(section.level, 6))
+        parts.append(f"{hashes} {section.heading}\n\n{section.content}")
+    return "\n\n".join(parts)
+
+
+def _format_grounding_pairs(pairs: list[GroundingPair]) -> str:
+    """Render grounding pairs as the citation_grounding agent's input block."""
+    blocks: list[str] = []
+    for i, pair in enumerate(pairs, 1):
+        blocks.append(
+            f"--- Pair {i} ---\n"
+            f"citation_id: {pair.citation_id}\n"
+            f"section: {pair.section}\n"
+            f"claim_text: {pair.claim_text}\n"
+            f"source_title: {pair.source_title}\n"
+            f"source_year: {pair.source_year}\n"
+            f"source_annotation: {pair.source_annotation}"
+        )
+    return "\n\n".join(blocks)
+
+
+@dataclass
+class CitationGroundingNode(BaseNode[WritingState, PipelineDeps, str]):
+    """Semantically verify every in-text citation against its source annotation.
+
+    Closes the dominant failure class from run-0511-2107: section writers
+    attaching citations to claims the cited source does not substantiate
+    (e.g. TAM cited to Sculley's ML technical-debt paper instead of Davis
+    1989). Parses `[@sNNN]` occurrences out of the merged draft, joins each
+    with its bibliography annotation, and asks the citation_grounding agent
+    to classify the match. The report flows downstream to the integrity
+    phase.
+    """
+
+    async def run(self, ctx: GraphRunContext[WritingState, PipelineDeps]) -> FigureVerificationNode:
+        """Run citation grounding; skip cleanly when there's nothing to ground."""
+        draft = ctx.state.paper_draft
+        bibliography = ctx.state.bibliography
+        if draft is None or bibliography is None:
+            logger.info("Citation grounding skipped: missing paper_draft or bibliography.")
+            return FigureVerificationNode()
+
+        paper_md = _reconstruct_paper_markdown(draft)
+        citations = parse_citations(paper_md)
+        pairs = build_grounding_pairs(bibliography, citations)
+        if not pairs:
+            logger.info("Citation grounding skipped: no groundable citations in draft.")
+            return FigureVerificationNode()
+
+        context = (
+            f"Verify the following {len(pairs)} citation usage(s). For each pair, "
+            f"classify whether the source annotation supports the claim.\n\n"
+            f"{_format_grounding_pairs(pairs)}"
+        )
+        result = await traced_agent_run(
+            _agents["citation_grounding"],
+            context,
+            deps=ctx.deps,
+            name="citation_grounding",
+            phase="02-writing",
+        )
+        ctx.state.citation_grounding = result.output
+        ctx.state.messages.append({"role": "assistant", "content": result.output.summary})
         return FigureVerificationNode()
 
 
@@ -906,7 +985,7 @@ class LatexCompilerNode(BaseNode[WritingState, PipelineDeps, str]):
 
 
 def build_writing_graph() -> Graph:
-    """Build the writing subgraph with all 16 nodes."""
+    """Build the writing subgraph with all 17 nodes."""
     return Graph(  # pyright: ignore[reportReturnType]
         name="writing",
         nodes=[
@@ -921,6 +1000,7 @@ def build_writing_graph() -> Graph:
             CitationComplianceNode,
             ParallelAbstractVizNode,
             MergePhase5Node,
+            CitationGroundingNode,
             FigureVerificationNode,
             PeerReviewerNode,
             FormatterNode,

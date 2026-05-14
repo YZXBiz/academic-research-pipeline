@@ -137,6 +137,11 @@ docstring-code-format = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "strict"
+# Prepend src/ to sys.path so `import academic_pipeline` works under Python
+# 3.13, which silently skips underscore-prefixed .pth files (hatchling's
+# editable-install mechanism uses one). This makes pytest independent of
+# the editable-install workaround in the Makefile.
+pythonpath = ["src"]
 markers = [
     "medium: integration tests — localhost Docker, < 5 min",
     "large: e2e tests — real APIs, real LLM calls",

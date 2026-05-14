@@ -8,36 +8,39 @@ from typing import Annotated, Any
 
 # Runtime imports — pydantic-graph snapshot serialization needs these at
 # runtime; moving them under TYPE_CHECKING breaks resume.
-from pydantic import Field  # noqa: TCH002
+from pydantic import Field
 
 from academic_pipeline.models.chain import (
-    DevelopmentChain,  # noqa: TCH001
-    ThesisStatement,  # noqa: TCH001
+    DevelopmentChain,  # noqa: TC001
+    ThesisStatement,  # noqa: TC001
+)
+from academic_pipeline.models.citation_grounding import (
+    CitationGroundingReport,  # noqa: TC001
 )
 from academic_pipeline.models.experiment import (
-    ExperimentAnalysis,  # noqa: TCH001
-    ExperimentResults,  # noqa: TCH001
-    FigureArtifact,  # noqa: TCH001
+    ExperimentAnalysis,  # noqa: TC001
+    ExperimentResults,  # noqa: TC001
+    FigureArtifact,  # noqa: TC001
 )
 from academic_pipeline.models.numerical import NumericalStore
 from academic_pipeline.models.research import (
-    Bibliography,  # noqa: TCH001
-    RQBrief,  # noqa: TCH001
-    SynthesisReport,  # noqa: TCH001
+    Bibliography,  # noqa: TC001
+    RQBrief,  # noqa: TC001
+    SynthesisReport,  # noqa: TC001
 )
 from academic_pipeline.models.review import (
-    FigureVerificationReport,  # noqa: TCH001
-    ResponseToReviewers,  # noqa: TCH001
+    FigureVerificationReport,  # noqa: TC001
+    ResponseToReviewers,  # noqa: TC001
 )
 from academic_pipeline.models.writing import (
-    ArgumentBlueprint,  # noqa: TCH001
-    FigurePackage,  # noqa: TCH001
-    PaperConfig,  # noqa: TCH001
-    PaperDraft,  # noqa: TCH001
-    PaperOutline,  # noqa: TCH001
-    Section,  # noqa: TCH001
-    SectionSpec,  # noqa: TCH001
-    StyleProfile,  # noqa: TCH001
+    ArgumentBlueprint,  # noqa: TC001
+    FigurePackage,  # noqa: TC001
+    PaperConfig,  # noqa: TC001
+    PaperDraft,  # noqa: TC001
+    PaperOutline,  # noqa: TC001
+    Section,  # noqa: TC001
+    SectionSpec,  # noqa: TC001
+    StyleProfile,  # noqa: TC001
 )
 from academic_pipeline.runtime.score_trajectory import (
     check_early_stop,
@@ -95,6 +98,11 @@ class WritingState:
     # Ephemeral inter-node
     internal_review: str = ""
     citation_audit: dict[str, Any] = field(default_factory=dict)
+    # Semantic citation-grounding report — verifies each [@sNNN] use against
+    # the cited source's annotation. Populated by CitationGroundingNode;
+    # consumed downstream by the integrity phase. None when there is no
+    # bibliography or no citations to ground.
+    citation_grounding: CitationGroundingReport | None = None
     abstract_result: dict[str, Any] = field(default_factory=dict)
     peer_review_round: int = 0
     needs_revision: bool = False
