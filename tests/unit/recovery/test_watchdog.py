@@ -31,11 +31,12 @@ def test_watchdog_config_is_frozen() -> None:
 
 def test_watchdog_config_defaults() -> None:
     cfg = WatchdogConfig(thread_id="t")
-    # 600s (10min) gives headroom over the slowest known node
-    # (SourceVerificationNode silent S2/CrossRef loops at ~60-120s) while
-    # still recovering the multi-hour proxy-SSE wedges this watchdog
-    # exists for. 75s was the original default and proved much too aggressive.
-    assert cfg.max_idle_s == 600
+    # 2400s (40min) holds open the agent_cap < watchdog_idle invariant —
+    # bounded_agent_run is at 1800s. Each bump up has chased a real run that
+    # legitimately needed longer (run-0511 integrity, run-0514 citation
+    # compliance). The watchdog catches multi-hour wedges; minutes of honest
+    # work shouldn't trip it.
+    assert cfg.max_idle_s == 2400
     assert cfg.poll_interval_s == 30
     assert cfg.auto_resume is False
     assert cfg.max_strikes == 3
