@@ -67,8 +67,16 @@ instructions: |
      identity check on type hints breaks under PEP 563 deferred eval).
   3. Use `app_config: ConfigResource` as the parameter name (NOT
      `config:` — that collides with Dagster's op Config schema).
-  4. Reference upstream tables by their string names in `deps=[...]`,
-     e.g. `deps=["raw_train"]` for a feature engineering asset.
+  4. `deps=[...]` takes DAGSTER ASSET NAMES, not DuckDB table names.
+     The template's loader is one asset named `raw_data` that creates
+     all the `raw_<stem>` DuckDB tables in a single materialization.
+     So a first-level asset that reads the raw data must declare
+     `deps=["raw_data"]`, then `SELECT * FROM raw_<stem>` inside the
+     body. Writing `deps=["raw_train"]` is a hard bug: Dagster
+     schedules your asset without first running `raw_data`, the table
+     doesn't exist yet, and `SELECT` crashes. Downstream assets
+     reference whichever Dagster @asset you defined upstream, e.g.
+     `deps=["data_prep"]`.
   5. Read the random seed from `app_config.get().reproducibility.random_seed`.
 
   ### Output contract for the FINAL asset
