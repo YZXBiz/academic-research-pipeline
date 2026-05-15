@@ -18,6 +18,9 @@ dependencies = [
     "huggingface-hub>=0.29",
     "datasets>=3.0",
     "autogluon-tabular[catboost,lightgbm,xgboost]>=1.5",
+    "betacal>=1.1",
+    "matplotlib>=3.7",
+    "seaborn>=0.13",
     "truststore>=0.10",
 ]
 
