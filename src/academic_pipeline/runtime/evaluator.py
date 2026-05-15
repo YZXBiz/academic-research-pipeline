@@ -75,7 +75,7 @@ async def _run_single_evaluator(
         )
     else:
         prompt = f"Rubric:\n{rubric}\n\nOutput to evaluate:\n{output_json}"
-    result = await bounded_agent_run(agent, prompt, timeout_s=900.0)
+    result = await bounded_agent_run(agent, prompt, timeout_s=1800.0)
     return result.output
 
 
@@ -206,7 +206,7 @@ async def run_with_evaluation(
     # explicit `quality_threshold` kwarg still wins over both.
     threshold = quality_threshold or deps.config.get_node_threshold(name)
 
-    best_result = await bounded_agent_run(agent, context, deps=deps, timeout_s=900.0)
+    best_result = await bounded_agent_run(agent, context, deps=deps, timeout_s=1800.0)
 
     if not deps.config.enable_node_evaluation:
         if deps.trace_logger and name:
@@ -248,7 +248,7 @@ async def run_with_evaluation(
             f"Please revise to address this specific feedback."
         )
 
-        revised_result = await bounded_agent_run(agent, revision_context, deps=deps, timeout_s=900.0)
+        revised_result = await bounded_agent_run(agent, revision_context, deps=deps, timeout_s=1800.0)
 
         revised_eval = await evaluate_node_output(
             output_json=_output_to_json(revised_result.output),

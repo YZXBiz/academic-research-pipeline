@@ -44,10 +44,12 @@ class WatchdogConfig:
     # 75s was the original default and proved much too aggressive. 600s held
     # until run-0511-2107, where integrity_verification_agent's combined
     # Exa+claim-verification reasoning legitimately exceeded the coupled 480s
-    # agent.run cap (see trace_logger._AGENT_RUN_TIMEOUT_S). Both bumped in
-    # tandem to keep agent_cap < watchdog_idle: agent=900s, watchdog=1200s.
-    # The watchdog's purpose remains catching MULTI-HOUR wedges, not minutes.
-    max_idle_s: int = 1200
+    # agent.run cap (see trace_logger._AGENT_RUN_TIMEOUT_S). Then run-0514-2022
+    # hit the 900s cap on citation_compliance auto-correcting a long paper.
+    # Both bumped again in tandem to keep agent_cap < watchdog_idle:
+    # agent=1800s, watchdog=2400s. The watchdog's purpose remains catching
+    # MULTI-HOUR wedges, not minutes.
+    max_idle_s: int = 2400
     poll_interval_s: int = 30
     output_dir: Path = field(default_factory=lambda: Path("output"))
     persistence_dir: Path = field(default_factory=lambda: Path(".pipeline_runs"))

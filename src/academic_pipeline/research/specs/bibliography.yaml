@@ -165,8 +165,5 @@ instructions: |
   Do NOT pre-label any source as verified — this creates false confidence.
 model_settings:
   max_tokens: 32000
-capabilities:
-  - Thinking:
-      effort: xhigh
 retries: 2
 output_retries: 2

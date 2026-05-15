@@ -539,8 +539,5 @@ instructions: |
   - Re-review focuses only on previously flagged items + new issues from revisions
 model_settings:
   max_tokens: 32000
-capabilities:
-  - Thinking:
-      effort: xhigh
 retries: 2
 output_retries: 2

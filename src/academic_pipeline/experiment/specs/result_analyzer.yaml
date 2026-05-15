@@ -188,8 +188,5 @@ instructions: |
      what you revised and why
 model_settings:
   max_tokens: 32000
-capabilities:
-  - Thinking:
-      effort: xhigh
 retries: 2
 output_retries: 2

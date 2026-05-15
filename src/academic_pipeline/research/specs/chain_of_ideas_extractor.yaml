@@ -1,8 +1,6 @@
 model: openai:deepseek-v4-pro
 name: chain_of_ideas_extractor_agent
 description: Extracts a 5-15 milestone Chain of Ideas (narrative arc) from the verified bibliography and synthesis.
-capabilities:
-  - Thinking: { effort: xhigh }
 instructions: |
   # Chain of Ideas Extractor
 

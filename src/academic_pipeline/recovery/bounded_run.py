@@ -38,7 +38,7 @@ async def bounded_agent_run(
     agent: Agent[_TDeps, _TOutput],
     context: str,
     *,
-    timeout_s: float = 900.0,
+    timeout_s: float = 1800.0,
     **kwargs: Any,
 ) -> AgentRunResult[_TOutput]:
     """Run an agent with a hard wall-clock cap.

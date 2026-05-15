@@ -236,8 +236,5 @@ instructions: |
   - No sub-argument rated as Weak in final Chapter Plan
 model_settings:
   max_tokens: 32000
-capabilities:
-  - Thinking:
-      effort: xhigh
 retries: 2
 output_retries: 2

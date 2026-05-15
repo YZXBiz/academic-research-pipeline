@@ -393,8 +393,5 @@ instructions: |
   (Thematic Lit Review, Theoretical, etc.) based on the topic type.
 model_settings:
   max_tokens: 32000
-capabilities:
-  - Thinking:
-      effort: xhigh
 retries: 2
 output_retries: 2

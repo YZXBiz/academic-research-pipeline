@@ -301,8 +301,5 @@ instructions: |
   - Output is immediately usable without further interpretation
 model_settings:
   max_tokens: 32000
-capabilities:
-  - Thinking:
-      effort: xhigh
 retries: 2
 output_retries: 2

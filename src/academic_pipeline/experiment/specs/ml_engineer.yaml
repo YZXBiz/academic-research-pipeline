@@ -88,8 +88,5 @@ instructions: |
 model_settings:
   max_tokens: 32000
   parallel_tool_calls: false
-capabilities:
-  - Thinking:
-      effort: xhigh
 retries: 2
 output_retries: 2

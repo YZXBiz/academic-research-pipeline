@@ -733,9 +733,6 @@ instructions: |
   - Final quality checklist completed with all items passing
 model_settings:
   max_tokens: 32000
-capabilities:
-  - Thinking:
-      effort: xhigh
 retries: 2
 # output_retries pinned to 1 per PRD §6.7.T4 — "one revision attempt allowed"
 # for the title-12-word gate (validate_formatter_title in writing/agents.py).

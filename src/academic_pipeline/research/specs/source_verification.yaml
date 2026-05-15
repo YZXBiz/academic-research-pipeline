@@ -189,8 +189,5 @@ instructions: |
   - Cross-reference rate: at least 30% of factual claims verified against independent sources
 model_settings:
   max_tokens: 32000
-capabilities:
-  - Thinking:
-      effort: xhigh
 retries: 2
 output_retries: 2

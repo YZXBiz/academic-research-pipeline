@@ -225,8 +225,5 @@ instructions: |
   5. **Citation Alerts**: In Web of Science or Scopus → find your paper (once published) → set up citation alerts
 model_settings:
   max_tokens: 32000
-capabilities:
-  - Thinking:
-      effort: xhigh
 retries: 2
 output_retries: 2

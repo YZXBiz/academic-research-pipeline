@@ -507,8 +507,5 @@ instructions: |
   | No overstepping | Do not make paper quality judgments, only factual verification                                                                                                                              |
 model_settings:
   max_tokens: 32000
-capabilities:
-  - Thinking:
-      effort: xhigh
 retries: 2
 output_retries: 2

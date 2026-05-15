@@ -72,7 +72,4 @@ instructions: |
 
 model_settings:
   max_tokens: 32000
-capabilities:
-  - Thinking:
-      effort: xhigh
 output_retries: 2

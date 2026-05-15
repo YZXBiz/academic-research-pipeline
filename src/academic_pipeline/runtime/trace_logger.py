@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _MAX_TOOL_RESULT_CHARS = 3000
-_AGENT_RUN_TIMEOUT_S = 900.0
+_AGENT_RUN_TIMEOUT_S = 1800.0
 # 15-minute wall-clock cap per agent.run. Must be LESS than recovery/watchdog.py
 # max_idle_s (1200s) so wedged calls raise AgentTimeoutError → the snapshot is
 # recorded as 'error' → auto-resume picks up cleanly.
