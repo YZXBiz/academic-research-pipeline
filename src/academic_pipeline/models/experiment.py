@@ -6,26 +6,27 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+
 __all__ = [
-    "ExperimentClassification",
+    "BaselineComparison",
     "DatasetSpec",
     "DatasetVerificationResult",
-    "MethodSpec",
-    "ExperimentPlan",
-    "StatisticalTest",
-    "FigureArtifact",
-    "MultiSeedMetric",
-    "ExperimentResults",
-    "BaselineComparison",
-    "ExperimentAnalysis",
-    "FigureReview",
-    "FigureReviewResult",
-    "PlanAlignmentResult",
     "DesignAlternative",
     "DesignBundle",
-    "DesignScore",
-    "SelectedDesigns",
     "DesignComparison",
+    "DesignScore",
+    "ExperimentAnalysis",
+    "ExperimentClassification",
+    "ExperimentPlan",
+    "ExperimentResults",
+    "FigureArtifact",
+    "FigureReview",
+    "FigureReviewResult",
+    "MethodSpec",
+    "MultiSeedMetric",
+    "PlanAlignmentResult",
+    "SelectedDesigns",
+    "StatisticalTest",
 ]
 
 
