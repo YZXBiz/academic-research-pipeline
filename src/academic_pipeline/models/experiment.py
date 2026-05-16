@@ -26,8 +26,6 @@ __all__ = [
     "DesignScore",
     "SelectedDesigns",
     "DesignComparison",
-    "WorkspaceFile",
-    "WorkspaceFiles",
 ]
 
 
@@ -293,31 +291,3 @@ class DesignComparison(BaseModel):
         "considered, choice made, and tradeoffs."
     )
     chosen_design_id: str = Field(description="design_id whose results become the primary findings")
-
-
-class WorkspaceFile(BaseModel):
-    """One file the config_writer agent writes into the Dagster workspace.
-
-    The agent emits a list of these — config.yaml plus N Python @asset
-    modules under assets/experiment/. Path is relative to the workspace
-    root so the writer can place each file deterministically.
-    """
-
-    model_config = ConfigDict(frozen=True)
-
-    path: str = Field(
-        description="Path relative to workspace root, e.g. 'config.yaml' or "
-        "'src/pipeline/assets/experiment/cluster_assignments.py'."
-    )
-    content: str = Field(description="Full file contents. No markdown fences.")
-
-
-class WorkspaceFiles(BaseModel):
-    """Bundle of files the config_writer agent produces for one experiment."""
-
-    model_config = ConfigDict(frozen=True)
-
-    files: list[WorkspaceFile] = Field(
-        min_length=2,
-        description="At minimum: 1 config.yaml + 1 generated @asset module.",
-    )

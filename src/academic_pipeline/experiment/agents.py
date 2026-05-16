@@ -4,6 +4,7 @@ Centralises all Agent.from_file() definitions for the experiment subgraph.
 Imported by ``graph.py`` as
 ``from academic_pipeline.experiment.agents import agents as _agents``.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -13,6 +14,7 @@ from pydantic_ai import Agent, PromptedOutput, RunContext, Tool
 from pydantic_ai_skills import SkillsCapability
 
 from academic_pipeline.config import SKILLS_DIRS
+from academic_pipeline.core.deps import PipelineDeps
 from academic_pipeline.experiment.harness import (
     harness_hooks,
     template_gate,
@@ -27,14 +29,14 @@ from academic_pipeline.models.experiment import (
     ExperimentClassification,
     ExperimentPlan,
     FigureReviewResult,
-    WorkspaceFiles,
 )
 from academic_pipeline.models.experiment_output import (
     ExperimentComplete,
     ExperimentFailed,
     JudgeVerdict,
 )
-from academic_pipeline.core.deps import PipelineDeps
+from academic_pipeline.models.experiment_spec import ExperimentSpec
+from academic_pipeline.runtime.throttle import throttle_hooks
 from academic_pipeline.tools.bibliography.exa import web_fetch_exa, web_search_exa
 from academic_pipeline.tools.execution.autogluon_templates import (
     get_autogluon_multimodal_template,
@@ -53,7 +55,6 @@ from academic_pipeline.tools.execution.containers import (
     visualize_figure,
     write_file,
 )
-from academic_pipeline.runtime.throttle import throttle_hooks
 
 
 _AGENTS_DIR = Path(__file__).parent / "specs"
@@ -98,10 +99,16 @@ agents: dict[str, Agent[PipelineDeps, Any]] = {
         tools=[
             Tool(create_file, max_retries=5),
             Tool(write_file, max_retries=5),
-            read_file, list_files, create_directory, gen_code_tree,
-            execute_command, run_python,
-            get_autogluon_tabular_template, get_autogluon_timeseries_template,
-            get_autogluon_multimodal_template, get_autogluon_presets_info,
+            read_file,
+            list_files,
+            create_directory,
+            gen_code_tree,
+            execute_command,
+            run_python,
+            get_autogluon_tabular_template,
+            get_autogluon_timeseries_template,
+            get_autogluon_multimodal_template,
+            get_autogluon_presets_info,
         ],
         end_strategy="graceful",
     ),
@@ -133,13 +140,16 @@ agents: dict[str, Agent[PipelineDeps, Any]] = {
         output_type=PromptedOutput(DesignComparison),
         capabilities=[throttle_hooks],
     ),
-    # v2: replaces ml_engineer as the only LLM in the experiment phase.
-    # Reads ExperimentPlan, writes a WorkspaceFiles bundle (config.yaml +
-    # generated @asset modules under src/pipeline/assets/experiment/).
+    # 2026-05-15 cutover: replaces the free-form WorkspaceFiles codegen
+    # contract with a typed ExperimentSpec. The agent picks values from
+    # enums (algorithms, calibration_methods, metrics) and provides
+    # dataset metadata; the workspace template ships a canonical
+    # @asset chain (pipeline.assets.experiment.canonical) that runs
+    # those choices. No agent codegen, no codegen-class failures.
     "config_writer": Agent.from_file(
         _AGENTS_DIR / "config_writer.yaml",
         deps_type=PipelineDeps,
-        output_type=PromptedOutput(WorkspaceFiles),
+        output_type=PromptedOutput(ExperimentSpec),
         capabilities=[throttle_hooks],
     ),
 }
@@ -148,9 +158,11 @@ agents: dict[str, Agent[PipelineDeps, Any]] = {
 agents["ml_engineer"].output_validator(validate_experiment_output)
 agents["experiment_designer"].output_validator(validate_experiment_plan)
 
+
 # Layer 6: Dynamic instruction injection — predictor_type context
 def _inject_predictor_type(ctx: RunContext[PipelineDeps]) -> str:
     return f"The classified predictor type for this experiment is: {ctx.deps.predictor_type}"
+
 
 for _name in (
     "experiment_designer",

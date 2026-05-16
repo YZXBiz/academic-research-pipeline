@@ -78,28 +78,6 @@ def strip_code_fences(code: str) -> str:
     return code
 
 
-def _strip_markdown_fences(text: str) -> str:
-    """Strip ```yaml / ``` markdown code fences from LLM output.
-
-    LLMs frequently wrap structured-output strings in markdown fences even
-    when the output schema is plain str. The Dagster workspace's YAML
-    loader fails with ``ScannerError`` on the leading backticks. Strip them
-    surgically — only outer fences, no regex scan that could damage backtick
-    characters appearing inside the YAML body.
-    """
-    text = text.strip()
-    if text.startswith("```yaml"):
-        text = text[len("```yaml") :]
-    elif text.startswith("```yml"):
-        text = text[len("```yml") :]
-    elif text.startswith("```"):
-        text = text[3:]
-    text = text.lstrip("\n").rstrip()
-    if text.endswith("```"):
-        text = text[:-3].rstrip()
-    return text
-
-
 def _parse_stat_tests(raw: dict) -> dict[str, StatisticalTest]:
     """Parse raw statistical test dicts into StatisticalTest models."""
     result: dict[str, StatisticalTest] = {}
@@ -633,20 +611,22 @@ class JudgeNode(BaseNode[ExperimentState, PipelineDeps, str]):
 
 @dataclass
 class ConfigWriterNode(BaseNode[ExperimentState, PipelineDeps, str]):
-    """v2: single LLM call generates the entire experiment workspace.
+    """2026-05-15 cutover: single LLM call fills a typed ExperimentSpec.
 
-    The agent emits a WorkspaceFiles bundle: orchestration config.yaml plus
-    N Python @asset modules under src/pipeline/assets/experiment/. The
-    template provides the Dagster scaffold (resources, data_load, package
-    init); the agent fills in ALL the ML logic.
+    No Python codegen. The agent picks values from enums (algorithms,
+    calibration_methods, metrics) and provides dataset metadata. We
+    serialize the spec into the workspace's config.yaml, and the
+    template-shipped `pipeline.assets.experiment.canonical` chain runs
+    it. The whole class of agent-codegen failures (dangling @asset
+    deps, wrong import paths, missing pip deps, wrong sklearn API) is
+    structurally impossible under this contract.
     """
 
     async def run(self, ctx: GraphRunContext[ExperimentState, PipelineDeps]) -> DagsterRunNode:  # noqa: D102
-        from academic_pipeline.experiment.dagster_workspace_validator import (
-            validate_dagster_deps,
-        )
+        import yaml  # PyYAML, already a project dep
+
         from academic_pipeline.experiment.template_copier import copy_template_into
-        from academic_pipeline.models.experiment import WorkspaceFiles
+        from academic_pipeline.models.experiment_spec import ExperimentSpec
 
         out_root = (
             Path(getattr(ctx.deps.config, "output_dir", None) or "output")
@@ -660,84 +640,57 @@ class ConfigWriterNode(BaseNode[ExperimentState, PipelineDeps, str]):
 
         plan_json = ctx.state.plan.model_dump_json(indent=2) if ctx.state.plan else "{}"
         rq_json = ctx.state.rq_brief or "{}"
-        base_ctx = (
-            f"Topic: {ctx.state.topic}\n\n"
-            f"ExperimentPlan:\n{plan_json}\n\n"
-            f"Research question brief:\n{rq_json}\n\n"
-            f"Workspace path: {workspace}\n"
+        agent_ctx = f"Topic: {ctx.state.topic}\n\nExperimentPlan:\n{plan_json}\n\nResearch question brief:\n{rq_json}\n"
+
+        result = await traced_agent_run(
+            _agents["config_writer"],
+            agent_ctx,
+            deps=ctx.deps,
+            name="config_writer",
+            phase=PHASE_DIRS[Stage.EXPERIMENT],
         )
+        spec = result.output
+        if not isinstance(spec, ExperimentSpec):
+            raise RuntimeError(f"config_writer returned {type(spec).__name__}, expected ExperimentSpec")
 
-        # One retry budget for dangling-dep validation. The agent's
-        # @asset deps frequently reference upstream names that aren't
-        # defined anywhere (cv_metrics, predictions, model_probabilities,
-        # raw_train). Dagster then silently degrades to phantom external
-        # assets, produces no results.json, and the pipeline writes a
-        # [PENDING] paper. The retry feeds the structured errors back to
-        # the agent for a corrected generation.
-        agent_ctx = base_ctx
-        written: list[str] = []
-        for attempt in (1, 2):
-            result = await traced_agent_run(
-                _agents["config_writer"],
-                agent_ctx,
-                deps=ctx.deps,
-                name=f"config_writer{'_retry' if attempt == 2 else ''}",
-                phase=PHASE_DIRS[Stage.EXPERIMENT],
-            )
-            bundle = result.output
-            if not isinstance(bundle, WorkspaceFiles):
-                raise RuntimeError(f"config_writer returned {type(bundle).__name__}, expected WorkspaceFiles")
-
-            written = []
-            for f in bundle.files:
-                target = workspace / f.path
-                if not str(target.resolve()).startswith(str(workspace.resolve())):
-                    raise RuntimeError(f"config_writer attempted to write outside workspace: {f.path}")
-                target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_text(_strip_markdown_fences(f.content))
-                written.append(str(target.relative_to(workspace)))
-
-            if not any(p == "config.yaml" for p in written):
-                raise RuntimeError(f"config_writer did not produce config.yaml (got: {written})")
-
-            dep_errors = validate_dagster_deps(workspace)
-            if not dep_errors:
-                break
-            if attempt == 2:
-                # Don't crash here — keep the partial workspace so DagsterRunNode
-                # surfaces the failure with a real stderr that ExperimentPhaseNode
-                # can route to AbortNode.
-                logger.warning(
-                    "config_writer produced %d dangling deps after retry; aborting cleanly via Dagster: %s",
-                    len(dep_errors),
-                    [e.render() for e in dep_errors],
-                )
-                ctx.state.error_history.append(
-                    "config_writer produced dangling @asset deps after 1 retry: "
-                    + "; ".join(e.render() for e in dep_errors)
-                )
-                break
-            feedback = "\n".join(f"- {e.render()}" for e in dep_errors)
-            logger.info("config_writer dangling deps on attempt 1; retrying with feedback: %s", feedback)
-            agent_ctx = (
-                f"{base_ctx}\n"
-                "Your previous generation referenced upstream @assets that don't exist.\n"
-                "Every name in `deps=[...]` MUST be either:\n"
-                "  (a) the template-shipped asset `raw_data` (creates the raw_<stem> DuckDB tables), or\n"
-                "  (b) a `def NAME(...)` decorated with `@asset` in another module you're emitting.\n"
-                "Specifically fix:\n"
-                f"{feedback}\n"
-                "Re-emit the COMPLETE workspace with corrected deps. Keep the same algorithms, "
-                "the same metrics, the same files — only the deps lists need to change."
-            )
+        mlflow_name = "_".join(ctx.state.topic.lower().split())[:60] or "experiment"
+        config_yaml = {
+            "schema_version": 1,
+            "dataset": {
+                "source": spec.dataset.source,
+                "files": list(spec.dataset.files),
+                "entity_id_column": spec.dataset.entity_id_column,
+                "date_column": None,
+                "target_column_patterns": list(spec.dataset.target_column_patterns),
+            },
+            "mlflow": {"experiment_name": mlflow_name},
+            "reproducibility": {"random_seed": spec.random_seed},
+            "experiment_spec": {
+                "algorithms": [a.value for a in spec.algorithms],
+                "calibration_methods": [c.value for c in spec.calibration_methods],
+                "metrics": [m.value for m in spec.metrics],
+                "random_seed": spec.random_seed,
+                "time_limit_s": spec.time_limit_s,
+            },
+        }
+        (workspace / "config.yaml").write_text(yaml.safe_dump(config_yaml, sort_keys=False))
 
         ctx.state.messages.append(
             {
                 "role": "system",
-                "content": f"config_writer wrote {len(written)} files: {', '.join(written)}",
+                "content": (
+                    f"config_writer wrote config.yaml: algos={[a.value for a in spec.algorithms]} "
+                    f"cals={[c.value for c in spec.calibration_methods]} "
+                    f"metrics={[m.value for m in spec.metrics]}"
+                ),
             }
         )
-        logger.info("config_writer wrote %d files into %s", len(written), workspace)
+        logger.info(
+            "config_writer wrote spec: algos=%s cals=%s metrics=%s",
+            [a.value for a in spec.algorithms],
+            [c.value for c in spec.calibration_methods],
+            [m.value for m in spec.metrics],
+        )
         return DagsterRunNode(workspace=workspace)
 
 
