@@ -257,6 +257,11 @@ class PipelineConfig(BaseSettings):
         ],
     )
 
+    # Bypass the CrossRef DOI verification gate in BibTexGenerator. Default
+    # is fail-closed (REN001 aborts the pipeline on any unverified DOI). Set
+    # True when CrossRef is rate-limiting or you trust the agent's DOIs.
+    allow_unverified_dois: bool = False
+
     # Dataset discovery + email alerts (values from .env)
     experiment_dataset_path: str = ""
     experiment_alert_email: str = ""

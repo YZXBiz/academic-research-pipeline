@@ -974,6 +974,7 @@ class LatexCompilerNode(BaseNode[WritingState, PipelineDeps, str]):
                 numerical_store=ctx.state.numerical_store,
                 traceability_mode=ctx.deps.config.traceability_mode,
                 experiment_runs=_build_experiment_runs_for_appendix(ctx.state),
+                allow_unverified_dois=ctx.deps.config.allow_unverified_dois,
             )
 
             if pdf_path and pdf_path.exists():
