@@ -58,7 +58,27 @@ def raw_data(
 def _resolve(source: str, filename: str) -> str:
     if source.startswith("huggingface://"):
         repo = source.removeprefix("huggingface://")
-        return hf_hub_download(repo_id=repo, filename=filename, repo_type="dataset")
+        try:
+            return hf_hub_download(repo_id=repo, filename=filename, repo_type="dataset")
+        except Exception as exc:
+            # Agent reliably hallucinates plausible-but-wrong filenames
+            # (`train.parquet` when the dataset actually ships
+            # `diabetes-type-classified-training-dataset.parquet`). On
+            # 404, list the repo and try to match by extension; if that
+            # fails, fall back to the first non-readme file in the repo.
+            from huggingface_hub import list_repo_files
+
+            try:
+                files = list_repo_files(repo_id=repo, repo_type="dataset")
+            except Exception:
+                raise exc  # surface the original 404 if listing also fails
+            want_ext = Path(filename).suffix.lower()
+            candidates = [f for f in files if not f.startswith(".") and f != "README.md"]
+            same_ext = [f for f in candidates if Path(f).suffix.lower() == want_ext]
+            chosen = same_ext[0] if same_ext else (candidates[0] if candidates else None)
+            if chosen is None:
+                raise exc
+            return hf_hub_download(repo_id=repo, filename=chosen, repo_type="dataset")
     if source.startswith("file://"):
         return str(Path(source.removeprefix("file://")) / filename)
     if source.startswith(("http://", "https://")):

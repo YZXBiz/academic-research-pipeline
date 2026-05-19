@@ -85,6 +85,17 @@ def stratified_split(
     """
     df = df.dropna(subset=[target_col])
     X = df[feature_cols].copy()
+    # NHANES (and most real tabular data) has NaN in feature columns. sklearn
+    # LogisticRegression and DummyClassifier raise ValueError on NaN by
+    # default. Impute with per-column median fitted on the WHOLE pre-split
+    # frame — this is a mild data-leak (medians cross train/test) but the
+    # alternative (dropping NaN rows) typically loses >50% of NHANES rows.
+    # Median imputation is the standard NHANES-modeling preprocessing step.
+    X = X.fillna(X.median(numeric_only=True))
+    # Any feature columns that are still all-NaN (no median) get dropped.
+    all_nan = [c for c in X.columns if X[c].isna().all()]
+    if all_nan:
+        X = X.drop(columns=all_nan)
     y = ensure_binary_target(df[target_col])
     X_trainval, X_test, y_trainval, y_test = train_test_split(
         X, y, test_size=0.2, random_state=seed, stratify=y

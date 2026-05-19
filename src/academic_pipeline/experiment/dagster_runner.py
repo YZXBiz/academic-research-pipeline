@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -37,9 +38,16 @@ def run_dagster_job(
         text=True,
         timeout=600,
     )
+    # PYTHONPATH=src needed because Python 3.13 silently skips hatchling's
+    # underscore-prefixed `_editable_impl_*.pth` files, so the workspace's
+    # `pipeline` package isn't importable from a uv-managed venv. Without
+    # this, dagster job execute fails at module-load with
+    # `DagsterImportError: No module named 'pipeline'`.
+    env = {**os.environ, "PYTHONPATH": str(workspace / "src")}
     proc = subprocess.run(
         ["uv", "run", "dagster", "job", "execute", "-m", "pipeline.definitions"],
         cwd=workspace,
+        env=env,
         capture_output=True,
         text=True,
         timeout=timeout_s,
