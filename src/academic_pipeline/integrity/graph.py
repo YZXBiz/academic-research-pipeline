@@ -200,6 +200,48 @@ class EthicsChecklistNode(BaseNode[IntegrityState, PipelineDeps, str]):
 
 
 @dataclass
+class CitationVerificationNode(BaseNode[IntegrityState, PipelineDeps, str]):
+    """Deterministic citation-existence gate; writes the report, blocking is in IntegrityCheckNode."""
+
+    async def run(self, ctx: GraphRunContext[IntegrityState, PipelineDeps]) -> IntegrityCheckNode:
+        """Verify the bibliography's existence and store the report on state."""
+        sources = ctx.state.bibliography_sources
+        if not sources or ctx.deps.config.citation_existence == "off":
+            return IntegrityCheckNode()
+
+        from academic_pipeline.tools.bibliography.citation_verifier import run_citation_gate
+        from academic_pipeline.tools.bibliography.doi import check_retraction
+        from academic_pipeline.tools.bibliography.verification_cache import VerificationCache
+
+        async def _retraction(doi: str) -> bool:
+            return json.loads(await check_retraction(doi)).get("retracted") is True
+
+        cache_path = ctx.deps.config.verification_cache_path
+        cache = VerificationCache(cache_path) if cache_path else None
+        try:
+            report = await run_citation_gate(
+                sources,
+                mailto=ctx.deps.config.crossref_mailto,
+                retraction_check=_retraction,
+                cache=cache,
+            )
+        finally:
+            if cache is not None:
+                cache.close()
+        ctx.state.citation_existence = report
+        logger.info("Citation existence: %s", report.advisory_summary)
+
+        reference_year = ctx.deps.config.report_reference_year
+        if reference_year is not None:
+            from academic_pipeline.models.temporal_verification import verify_temporal
+
+            temporal_report = verify_temporal(report.verifications, reference_year=reference_year)
+            ctx.state.temporal = temporal_report
+            logger.info("Temporal: %s", temporal_report.summary)
+        return IntegrityCheckNode()
+
+
+@dataclass
 class IntegrityCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
     """Run integrity verification on the paper draft."""
 
@@ -327,6 +369,26 @@ class IntegrityCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
                 len(consistency_findings),
             )
 
+        citation_existence = ctx.state.citation_existence
+        if (
+            citation_existence is not None
+            and ctx.deps.config.citation_existence == "strict"
+            and citation_existence.blocking_rows
+        ):
+            verdict = Verdict.FAIL
+            logger.warning(
+                "Citation existence: %d blocking row(s) under strict — verdict forced to FAIL",
+                len(citation_existence.blocking_rows),
+            )
+
+        temporal = ctx.state.temporal
+        if temporal is not None and ctx.deps.config.citation_existence == "strict" and temporal.blocking_rows:
+            verdict = Verdict.FAIL
+            logger.warning(
+                "Temporal: %d impossible citation(s) under strict — verdict forced to FAIL",
+                len(temporal.blocking_rows),
+            )
+
         report_text = output.report or output.summary
         # Append scan results so they appear in the integrity report artifact.
         report_text = f"{report_text}\n\n{scan_report}\n\n{consistency_report}"
@@ -347,6 +409,8 @@ class IntegrityCheckNode(BaseNode[IntegrityState, PipelineDeps, str]):
                 for f in placeholder_findings
             ],
             "citation_grounding_mismatches": grounding_mismatches,
+            "citation_existence": citation_existence.advisory_summary if citation_existence is not None else None,
+            "temporal": temporal.summary if temporal is not None else None,
             "discussion_results_findings": [
                 {"claim_text": f.claim_text, "line": f.line, "severity": f.severity} for f in consistency_findings
             ],
@@ -366,5 +430,5 @@ def build_integrity_graph() -> Graph:
     """
     return Graph(  # pyright: ignore[reportReturnType]
         name="integrity",
-        nodes=[EthicsChecklistNode, IntegrityCheckNode, ComplianceCheckNode],
+        nodes=[CitationVerificationNode, EthicsChecklistNode, IntegrityCheckNode, ComplianceCheckNode],
     )

@@ -36,7 +36,10 @@ from academic_pipeline.experiment.graph import (
     build_experiment_graph,
 )
 from academic_pipeline.experiment.state import ExperimentState
-from academic_pipeline.integrity.graph import IntegrityCheckNode, build_integrity_graph
+from academic_pipeline.integrity.graph import (
+    CitationVerificationNode,
+    build_integrity_graph,
+)
 from academic_pipeline.integrity.state import IntegrityState
 from academic_pipeline.models.experiment import FigureArtifact
 from academic_pipeline.models.integrity import MaterialPassport
@@ -579,13 +582,14 @@ class PreIntegrityNode(BaseNode[PipelineState, PipelineDeps, str]):
             integrity_phase="pre",
             compliance_stage="2.5",
             citation_grounding=ctx.state.citation_grounding,
+            bibliography_sources=ctx.state.bibliography.sources if ctx.state.bibliography else [],
         )
 
         graph = build_integrity_graph()
         fix_n = ctx.state.integrity_fix_count
         final_state: IntegrityState = await _run_subgraph_with_persistence(  # pyright: ignore[reportAssignmentType]
             graph,
-            IntegrityCheckNode(),
+            CitationVerificationNode(),
             integrity_state,
             ctx.deps,
             run_id=ctx.state.run_id,
@@ -698,13 +702,14 @@ class FinalIntegrityNode(BaseNode[PipelineState, PipelineDeps, str]):
             integrity_phase="final",
             compliance_stage="4.5",
             citation_grounding=ctx.state.citation_grounding,
+            bibliography_sources=ctx.state.bibliography.sources if ctx.state.bibliography else [],
         )
 
         graph = build_integrity_graph()
         fix_n = ctx.state.integrity_fix_count
         final_state: IntegrityState = await _run_subgraph_with_persistence(  # pyright: ignore[reportAssignmentType]
             graph,
-            IntegrityCheckNode(),
+            CitationVerificationNode(),
             integrity_state,
             ctx.deps,
             run_id=ctx.state.run_id,

@@ -272,6 +272,14 @@ class PipelineConfig(BaseSettings):
     # True when CrossRef is rate-limiting or you trust the agent's DOIs.
     allow_unverified_dois: bool = False
 
+    # Citation-existence gate: off skips it, advisory surfaces issues, strict fails integrity.
+    citation_existence: Literal["off", "advisory", "strict"] = "advisory"
+    crossref_mailto: str = "academic-pipeline@users.noreply.github.com"
+    # SQLite path for the cross-run resolver cache; empty disables caching.
+    verification_cache_path: str = ""
+    # Paper reference year for temporal verification; None disables it.
+    report_reference_year: int | None = None
+
     # Dataset discovery + email alerts (values from .env)
     experiment_dataset_path: str = ""
     experiment_alert_email: str = ""
