@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: methodology_purist_reviewer_agent
 description: |
   Persona-anchored reviewer (thorough × domain_purist × deep_in_field).
@@ -70,9 +69,5 @@ instructions: |
 
 model_settings:
   max_tokens: 32000
-  extra_body:
-    thinking:
-      type: enabled
-      reasoning_effort: max
 retries: 2
 output_retries: 2

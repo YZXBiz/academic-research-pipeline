@@ -14,6 +14,7 @@ from academic_pipeline.models.integrity import (
     IntegrityVerificationOutput,
 )
 from academic_pipeline.research.ethics_validator import validate_ethics_checklist
+from academic_pipeline.runtime.model_registry import build_agent
 from academic_pipeline.runtime.throttle import throttle_hooks
 from academic_pipeline.tools.bibliography.doi import check_retraction, resolve_doi_metadata, verify_doi
 from academic_pipeline.tools.bibliography.exa import web_fetch_exa, web_search_exa
@@ -28,7 +29,8 @@ from academic_pipeline.tools.integrity_tools import (
 _AGENTS_DIR = Path(__file__).parent / "specs"
 
 agents: dict[str, Agent[PipelineDeps, Any]] = {
-    "integrity_verification": Agent.from_file(
+    "integrity_verification": build_agent(
+        "integrity_verification",
         _AGENTS_DIR / "integrity_verification.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(IntegrityVerificationOutput),
@@ -46,7 +48,8 @@ agents: dict[str, Agent[PipelineDeps, Any]] = {
             get_s2_paper_details,
         ],
     ),
-    "compliance_check": Agent.from_file(
+    "compliance_check": build_agent(
+        "compliance_check",
         _AGENTS_DIR / "compliance_check.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(ComplianceReport),
@@ -56,7 +59,8 @@ agents: dict[str, Agent[PipelineDeps, Any]] = {
     # along with its YAML spec. The structured-checklist output_validator
     # (validate_ethics_checklist) enforces 12-item / canonical-order /
     # blocker-consistency invariants.
-    "ethics_review": Agent.from_file(
+    "ethics_review": build_agent(
+        "ethics_review",
         _AGENTS_DIR / "ethics_review.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(EthicsChecklist),

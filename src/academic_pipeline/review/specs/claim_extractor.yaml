@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: claim_extractor_agent
 description: Extracts atomic contribution claims from a finished manuscript for per-claim novelty assessment.
 instructions: |
@@ -57,9 +56,5 @@ instructions: |
   parsing is exact.
 model_settings:
   max_tokens: 32000
-  extra_body:
-    thinking:
-      type: enabled
-      reasoning_effort: max
 retries: 2
 output_retries: 2

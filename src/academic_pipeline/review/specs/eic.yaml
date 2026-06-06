@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: eic_agent
 description: Editor-in-Chief perspective reviewer assessing overall quality, originality, significance, and journal fit.
 instructions: |
@@ -186,9 +185,5 @@ instructions: |
   - Evaluate the argumentation process, not the conclusions themselves
 model_settings:
   max_tokens: 32000
-  extra_body:
-    thinking:
-      type: enabled
-      reasoning_effort: max
 retries: 2
 output_retries: 2

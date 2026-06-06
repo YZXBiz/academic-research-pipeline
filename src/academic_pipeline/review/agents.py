@@ -27,6 +27,7 @@ from academic_pipeline.models.review import (
     FieldAnalysis,
     PeerReviewReport,
 )
+from academic_pipeline.runtime.model_registry import build_agent
 from academic_pipeline.runtime.throttle import throttle_hooks
 from academic_pipeline.tools.bibliography.exa import web_fetch_exa, web_search_exa
 
@@ -37,79 +38,91 @@ _COMPACTION = AnthropicCompaction(token_threshold=DEFAULT_CONFIG.compaction_toke
 _AGENTS_DIR = Path(__file__).parent / "specs"
 
 agents: dict[str, Agent[PipelineDeps, Any]] = {
-    "field_analyst": Agent.from_file(
+    "field_analyst": build_agent(
+        "field_analyst",
         _AGENTS_DIR / "field_analyst.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(FieldAnalysis),
         capabilities=[throttle_hooks],
     ),
-    "eic": Agent.from_file(
+    "eic": build_agent(
+        "eic",
         _AGENTS_DIR / "eic.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(EICReview),
         capabilities=[throttle_hooks],
     ),
-    "methodology_reviewer": Agent.from_file(
+    "methodology_reviewer": build_agent(
+        "methodology_reviewer",
         _AGENTS_DIR / "methodology_reviewer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(PeerReviewReport),
         capabilities=[throttle_hooks, SkillsCapability(directories=SKILLS_DIRS), _COMPACTION],  # pyright: ignore[reportArgumentType]
         tools=[web_search_exa, web_fetch_exa],
     ),
-    "domain_reviewer": Agent.from_file(
+    "domain_reviewer": build_agent(
+        "domain_reviewer",
         _AGENTS_DIR / "domain_reviewer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(PeerReviewReport),
         capabilities=[throttle_hooks, SkillsCapability(directories=SKILLS_DIRS), _COMPACTION],  # pyright: ignore[reportArgumentType]
         tools=[web_search_exa, web_fetch_exa],
     ),
-    "perspective_reviewer": Agent.from_file(
+    "perspective_reviewer": build_agent(
+        "perspective_reviewer",
         _AGENTS_DIR / "perspective_reviewer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(PeerReviewReport),
         capabilities=[throttle_hooks, SkillsCapability(directories=SKILLS_DIRS), _COMPACTION],  # pyright: ignore[reportArgumentType]
         tools=[web_search_exa, web_fetch_exa],
     ),
-    "editorial_synthesizer": Agent.from_file(
+    "editorial_synthesizer": build_agent(
+        "editorial_synthesizer",
         _AGENTS_DIR / "editorial_synthesizer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(EditorialSynthesis),
         capabilities=[throttle_hooks, _COMPACTION],  # pyright: ignore[reportArgumentType]
     ),
-    "claim_extractor": Agent.from_file(
+    "claim_extractor": build_agent(
+        "claim_extractor",
         _AGENTS_DIR / "claim_extractor.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(ContributionClaimList),
         capabilities=[throttle_hooks, _COMPACTION],  # pyright: ignore[reportArgumentType]
     ),
-    "claim_novelty_assessor": Agent.from_file(
+    "claim_novelty_assessor": build_agent(
+        "claim_novelty_assessor",
         _AGENTS_DIR / "claim_novelty_assessor.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(ClaimAssessment),
         capabilities=[throttle_hooks],
     ),
-    "senior_gatekeeper_reviewer": Agent.from_file(
+    "senior_gatekeeper_reviewer": build_agent(
+        "senior_gatekeeper_reviewer",
         _AGENTS_DIR / "senior_gatekeeper_reviewer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(PersonaReviewOutput),
         capabilities=[throttle_hooks, SkillsCapability(directories=SKILLS_DIRS), _COMPACTION],  # pyright: ignore[reportArgumentType]
         tools=[web_search_exa, web_fetch_exa],
     ),
-    "applied_practitioner_reviewer": Agent.from_file(
+    "applied_practitioner_reviewer": build_agent(
+        "applied_practitioner_reviewer",
         _AGENTS_DIR / "applied_practitioner_reviewer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(PersonaReviewOutput),
         capabilities=[throttle_hooks, SkillsCapability(directories=SKILLS_DIRS), _COMPACTION],  # pyright: ignore[reportArgumentType]
         tools=[web_search_exa, web_fetch_exa],
     ),
-    "methodology_purist_reviewer": Agent.from_file(
+    "methodology_purist_reviewer": build_agent(
+        "methodology_purist_reviewer",
         _AGENTS_DIR / "methodology_purist_reviewer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(PersonaReviewOutput),
         capabilities=[throttle_hooks, SkillsCapability(directories=SKILLS_DIRS), _COMPACTION],  # pyright: ignore[reportArgumentType]
         tools=[web_search_exa, web_fetch_exa],
     ),
-    "numerical_claims_auditor": Agent.from_file(
+    "numerical_claims_auditor": build_agent(
+        "numerical_claims_auditor",
         _AGENTS_DIR / "numerical_claims_auditor.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(ClaimAuditReport),

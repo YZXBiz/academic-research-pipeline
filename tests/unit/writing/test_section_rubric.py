@@ -77,6 +77,9 @@ def test_section_writer_yaml_includes_anti_fabrication_section() -> None:
 
 def test_section_writer_yaml_loads_via_pydantic_ai() -> None:
     """The YAML must remain a valid PydanticAI agent spec."""
-    from pydantic_ai import Agent
-    agent = Agent.from_file("src/academic_pipeline/writing/specs/section_writer.yaml")
+    from academic_pipeline.runtime.model_registry import build_agent
+    agent = build_agent(
+        "section_writer",
+        "src/academic_pipeline/writing/specs/section_writer.yaml",
+    )
     assert agent is not None

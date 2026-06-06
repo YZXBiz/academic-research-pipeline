@@ -30,6 +30,7 @@ from academic_pipeline.models.writing import (
     PaperOutline,
     Section,
 )
+from academic_pipeline.runtime.model_registry import build_agent
 from academic_pipeline.runtime.throttle import throttle_hooks
 from academic_pipeline.tools.bibliography.citations import (
     convert_citation_style,
@@ -44,85 +45,99 @@ _COMPACTION = AnthropicCompaction(token_threshold=DEFAULT_CONFIG.compaction_toke
 _AGENTS_DIR = Path(__file__).parent / "specs"
 
 agents: dict[str, Agent[PipelineDeps, Any]] = {
-    "intake": Agent.from_file(
+    "intake": build_agent(
+        "intake",
         _AGENTS_DIR / "intake.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(PaperConfig),
         capabilities=[throttle_hooks],
     ),
-    "literature_strategist": Agent.from_file(
+    "literature_strategist": build_agent(
+        "literature_strategist",
         _AGENTS_DIR / "literature_strategist.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(LiteratureStrategy),
         capabilities=[throttle_hooks],
     ),
-    "structure_architect": Agent.from_file(
+    "structure_architect": build_agent(
+        "structure_architect",
         _AGENTS_DIR / "structure_architect.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(PaperOutline),
         capabilities=[throttle_hooks],
     ),
-    "argument_builder": Agent.from_file(
+    "argument_builder": build_agent(
+        "argument_builder",
         _AGENTS_DIR / "argument_builder.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(ArgumentBlueprint),
         capabilities=[throttle_hooks],
     ),
-    "draft_writer": Agent.from_file(
+    "draft_writer": build_agent(
+        "draft_writer",
         _AGENTS_DIR / "draft_writer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(PaperDraft),
         capabilities=[throttle_hooks, _COMPACTION],  # pyright: ignore[reportArgumentType]
     ),
-    "citation_compliance": Agent.from_file(
+    "citation_compliance": build_agent(
+        "citation_compliance",
         _AGENTS_DIR / "citation_compliance.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(CitationAudit),
         capabilities=[throttle_hooks, _COMPACTION],  # pyright: ignore[reportArgumentType]
         tools=[format_citation, validate_citation, convert_citation_style],
     ),
-    "citation_grounding": Agent.from_file(
+    "citation_grounding": build_agent(
+        "citation_grounding",
         _AGENTS_DIR / "citation_grounding.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(CitationGroundingReport),
         capabilities=[throttle_hooks, _COMPACTION],  # pyright: ignore[reportArgumentType]
     ),
-    "abstract": Agent.from_file(
+    "abstract": build_agent(
+        "abstract",
         _AGENTS_DIR / "abstract.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(AbstractOutput),
         capabilities=[throttle_hooks],
     ),
-    "peer_reviewer": Agent.from_file(
+    "peer_reviewer": build_agent(
+        "peer_reviewer",
         _AGENTS_DIR / "peer_reviewer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(PeerReviewOutput),
         capabilities=[throttle_hooks],
     ),
-    "formatter": Agent.from_file(
+    "formatter": build_agent(
+        "formatter",
         _AGENTS_DIR / "formatter.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(FormattedPaper),
         capabilities=[throttle_hooks, _COMPACTION],  # pyright: ignore[reportArgumentType]
     ),
-    "visualization": Agent.from_file(
+    "visualization": build_agent(
+        "visualization",
         _AGENTS_DIR / "visualization.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(FigurePackage),
         capabilities=[throttle_hooks],
     ),
-    "revision_coach": Agent.from_file(
+    "revision_coach": build_agent(
+        "revision_coach",
         _AGENTS_DIR / "revision_coach.yaml",
         deps_type=PipelineDeps,
         capabilities=[throttle_hooks],
     ),
-    "section_writer": Agent.from_file(
+    "section_writer": build_agent(
+        "section_writer",
         _AGENTS_DIR / "section_writer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(Section),
         capabilities=[throttle_hooks],
     ),
-    "figure_verifier": Agent.from_file(
+    "figure_verifier": build_agent(
+        "figure_verifier",
         _AGENTS_DIR / "figure_verifier.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(FigureVerificationReport),

@@ -10,9 +10,12 @@ def _yaml_text() -> str:
 
 
 def test_yaml_loads_via_pydantic_ai() -> None:
-    from pydantic_ai import Agent
+    from academic_pipeline.runtime.model_registry import build_agent
 
-    agent = Agent.from_file("src/academic_pipeline/integrity/specs/ethics_review.yaml")
+    agent = build_agent(
+        "ethics_review",
+        "src/academic_pipeline/integrity/specs/ethics_review.yaml",
+    )
     assert agent is not None
 
 

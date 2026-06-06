@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: report_compiler_agent
 description: Transforms research findings into polished APA 7.0 academic reports with revision tracking.
 instructions: |

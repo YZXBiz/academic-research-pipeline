@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: revision_coach_agent
 description: Parses unstructured reviewer comments into structured revision roadmaps with classification, mapping, and prioritization.
 instructions: |

@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: ethics_review_agent
 description: Produces a structured 12-item ethics checklist (PRISMA-trAIce + COI + AI-disclosure) with per-item justification and either a waiver or a blocker designation.
 instructions: |

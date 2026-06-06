@@ -80,8 +80,18 @@ class PipelineConfig(BaseSettings):
     openai_base_url: str = ""
     exa_api_key: SecretStr = SecretStr("")
     s2_api_key: SecretStr = SecretStr("")
-    model_name: str = "deepseek-v4-pro"
-    independent_verifier_model: str = "openai:deepseek-v4-pro"
+
+    # Model selection — single source of truth (see runtime.model_registry).
+    default_model: str = "openai:deepseek-v4-pro"
+    """Provider-prefixed model every agent runs on unless overridden. Flip the
+    whole pipeline between providers by setting DEFAULT_MODEL in .env, e.g.
+    `openai:deepseek-v4-pro` -> `anthropic:claude-opus-4-8`. The 53 agent specs
+    carry no model literal — `runtime.model_registry.build_agent` injects this."""
+    model_overrides: dict[str, str] = Field(default_factory=dict)
+    """Per-agent model overrides keyed by agent registry name — the escape hatch
+    for cross-model verification or cost lanes. Example (JSON in .env):
+    `MODEL_OVERRIDES={"independent_verifier":"anthropic:claude-opus-4-8"}`. Any
+    agent absent from this map uses `default_model`."""
 
     # Temperatures
     temperature_research: float = Field(default=0.3, ge=0.0, le=1.0)
@@ -286,12 +296,12 @@ class PipelineConfig(BaseSettings):
     # Rate limiting
     tool_call_delay_seconds: int = Field(default=10, ge=0)
 
-    @field_validator("model_name")
+    @field_validator("default_model")
     @classmethod
-    def model_name_not_empty(cls, v: str) -> str:
-        """Validate that model_name is not empty."""
+    def default_model_not_empty(cls, v: str) -> str:
+        """Validate that default_model is not empty."""
         if not v.strip():
-            raise ValueError("model_name cannot be empty")
+            raise ValueError("default_model cannot be empty")
         return v
 
     @field_validator("node_quality_thresholds")

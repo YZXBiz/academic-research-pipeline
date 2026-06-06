@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: field_analyst_agent
 description: Analyzes a paper's disciplinary positioning and dynamically generates reviewer configuration cards for the review team.
 instructions: |
@@ -224,9 +223,5 @@ instructions: |
   - Suggest reviewers conduct the review in the paper's language
 model_settings:
   max_tokens: 32000
-  extra_body:
-    thinking:
-      type: enabled
-      reasoning_effort: max
 retries: 2
 output_retries: 2

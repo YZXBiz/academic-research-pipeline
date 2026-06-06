@@ -144,18 +144,18 @@ def test_research_state_can_hold_chain_and_thesis() -> None:
 
 
 def test_chain_of_ideas_extractor_yaml_loads() -> None:
-    from pydantic_ai import Agent
+    from academic_pipeline.runtime.model_registry import build_agent
 
     spec = Path("src/academic_pipeline/research/specs/chain_of_ideas_extractor.yaml")
-    agent = Agent.from_file(spec)
+    agent = build_agent("chain_of_ideas_extractor", spec)
     assert agent is not None
 
 
 def test_thesis_extractor_yaml_loads() -> None:
-    from pydantic_ai import Agent
+    from academic_pipeline.runtime.model_registry import build_agent
 
     spec = Path("src/academic_pipeline/research/specs/thesis_extractor.yaml")
-    agent = Agent.from_file(spec)
+    agent = build_agent("thesis_extractor", spec)
     assert agent is not None
 
 
@@ -186,7 +186,7 @@ class _StubCtx:
     deps: _StubDeps
 
 
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_chain_of_ideas_node_skips_when_flag_off() -> None:
     """Flag-off path: PRD §6.1.T3 reorder makes ChainOfIdeasNode pass through to
     SynthesisNode (was: ReportCompilerNode pre-T3). The skip preserves both

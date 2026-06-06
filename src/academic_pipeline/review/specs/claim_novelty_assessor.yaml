@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: claim_novelty_assessor_agent
 description: Assesses one contribution claim against retrieved Semantic Scholar prior works and returns a per-claim verdict.
 instructions: |
@@ -60,9 +59,5 @@ instructions: |
   nearest_prior_works exactly as provided.
 model_settings:
   max_tokens: 16000
-  extra_body:
-    thinking:
-      type: enabled
-      reasoning_effort: max
 retries: 2
 output_retries: 2

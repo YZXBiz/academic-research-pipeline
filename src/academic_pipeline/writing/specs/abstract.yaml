@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: abstract_agent
 description: Writes high-quality structured abstracts with keywords for academic papers from completed drafts.
 instructions: |

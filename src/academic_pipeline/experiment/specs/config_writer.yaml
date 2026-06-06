@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: config_writer_agent
 description: Fills an ExperimentSpec (typed enums + dataset metadata) for the canonical benchmark-comparison @asset chain. Does not write Python.
 instructions: |

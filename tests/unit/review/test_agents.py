@@ -5,11 +5,11 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from pydantic_ai import Agent
 from pydantic_ai_skills import SkillsCapability
 
-from academic_pipeline.review.agents import agents
 from academic_pipeline.core.deps import PipelineDeps
+from academic_pipeline.review.agents import agents
+from academic_pipeline.runtime.model_registry import build_agent
 
 
 AGENTS_DIR = Path("src/academic_pipeline/review/specs")
@@ -30,7 +30,7 @@ class TestReviewAgentSpecs:
 
     @pytest.mark.parametrize("spec_name", EXPECTED_SPECS)
     def test_spec_loads(self, spec_name: str) -> None:
-        agent = Agent.from_file(AGENTS_DIR / spec_name, deps_type=PipelineDeps)
+        agent = build_agent(spec_name.removesuffix(".yaml"), AGENTS_DIR / spec_name, deps_type=PipelineDeps)
         assert agent is not None
 
 

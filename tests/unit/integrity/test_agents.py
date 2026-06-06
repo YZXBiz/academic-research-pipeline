@@ -3,19 +3,24 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
-from pydantic_ai import Agent
 from pydantic_ai.models.test import TestModel
 
-from academic_pipeline.models.integrity import IntegrityVerificationOutput
 from academic_pipeline.core.deps import PipelineDeps
+from academic_pipeline.models.integrity import IntegrityVerificationOutput
+from academic_pipeline.runtime.model_registry import build_agent
 from academic_pipeline.tools.integrity_tools import (
     check_plagiarism_heuristic,
     detect_ai_style_indicators,
     extract_claims,
 )
 from tests.conftest import make_test_deps
+
+
+if TYPE_CHECKING:
+    from pydantic_ai import Agent
 
 
 pytestmark = pytest.mark.anyio
@@ -25,7 +30,8 @@ SPEC_PATH = Path("src/academic_pipeline/integrity/specs/integrity_verification.y
 
 def _load_agent() -> Agent[PipelineDeps, IntegrityVerificationOutput]:
     """Load the integrity verification agent from YAML spec."""
-    return Agent.from_file(
+    return build_agent(
+        "integrity_verification",
         SPEC_PATH,
         deps_type=PipelineDeps,
         output_type=IntegrityVerificationOutput,

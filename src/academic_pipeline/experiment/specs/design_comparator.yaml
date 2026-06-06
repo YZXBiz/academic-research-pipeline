@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: design_comparator
 description: >
   Produces a DesignComparison artifact for the paper's Discussion section.

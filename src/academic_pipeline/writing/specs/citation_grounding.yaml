@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: citation_grounding_agent
 description: |
   Verifies that each in-text citation actually supports the surrounding claim
@@ -123,9 +122,5 @@ instructions: |
   `usages` list and a brief `summary` (≤3 sentences) of the audit.
 model_settings:
   max_tokens: 32000
-  extra_body:
-    thinking:
-      type: enabled
-      reasoning_effort: max
 retries: 2
 output_retries: 2

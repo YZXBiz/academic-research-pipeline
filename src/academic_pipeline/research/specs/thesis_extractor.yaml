@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: thesis_extractor_agent
 description: Formulates a falsifiable thesis statement grounded in a Chain of Ideas terminal unsolved problem.
 instructions: |

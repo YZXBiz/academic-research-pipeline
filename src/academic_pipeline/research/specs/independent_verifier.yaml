@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: independent_verifier_agent
 description: Independent second-pass verification of research claims and citations with maximum thinking effort.
 instructions: |
@@ -31,9 +30,5 @@ instructions: |
   - red_flags: List of specific concerns (empty if none)
 model_settings:
   max_tokens: 32000
-  extra_body:
-    thinking:
-      type: enabled
-      reasoning_effort: max
 retries: 2
 output_retries: 2

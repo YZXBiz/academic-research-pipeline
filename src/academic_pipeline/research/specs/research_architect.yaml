@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: research_architect_agent
 description: Designs methodological blueprints — paradigm, method, data strategy, analytical framework, and validity criteria.
 instructions: |

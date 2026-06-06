@@ -36,6 +36,7 @@ from academic_pipeline.models.experiment_output import (
     JudgeVerdict,
 )
 from academic_pipeline.models.experiment_spec import ExperimentSpec
+from academic_pipeline.runtime.model_registry import build_agent
 from academic_pipeline.runtime.throttle import throttle_hooks
 from academic_pipeline.tools.bibliography.exa import web_fetch_exa, web_search_exa
 from academic_pipeline.tools.execution.autogluon_templates import (
@@ -60,38 +61,44 @@ from academic_pipeline.tools.execution.containers import (
 _AGENTS_DIR = Path(__file__).parent / "specs"
 
 agents: dict[str, Agent[PipelineDeps, Any]] = {
-    "experiment_classifier": Agent.from_file(
+    "experiment_classifier": build_agent(
+        "experiment_classifier",
         _AGENTS_DIR / "experiment_classifier.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(ExperimentClassification),
         capabilities=[throttle_hooks],
     ),
-    "experiment_designer": Agent.from_file(
+    "experiment_designer": build_agent(
+        "experiment_designer",
         _AGENTS_DIR / "experiment_designer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(ExperimentPlan),
         capabilities=[throttle_hooks],
         tools=[web_search_exa, web_fetch_exa],
     ),
-    "result_analyzer": Agent.from_file(
+    "result_analyzer": build_agent(
+        "result_analyzer",
         _AGENTS_DIR / "result_analyzer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(ExperimentAnalysis),
         capabilities=[throttle_hooks],
     ),
-    "experiment_improver": Agent.from_file(
+    "experiment_improver": build_agent(
+        "experiment_improver",
         _AGENTS_DIR / "experiment_improver.yaml",
         deps_type=PipelineDeps,
         output_type=str,
         capabilities=[throttle_hooks],
     ),
-    "figure_reviewer": Agent.from_file(
+    "figure_reviewer": build_agent(
+        "figure_reviewer",
         _AGENTS_DIR / "figure_reviewer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(FigureReviewResult),
         capabilities=[throttle_hooks],
     ),
-    "ml_engineer": Agent.from_file(
+    "ml_engineer": build_agent(
+        "ml_engineer",
         _AGENTS_DIR / "ml_engineer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(ExperimentComplete | ExperimentFailed),
@@ -112,7 +119,8 @@ agents: dict[str, Agent[PipelineDeps, Any]] = {
         ],
         end_strategy="graceful",
     ),
-    "experiment_judge": Agent.from_file(
+    "experiment_judge": build_agent(
+        "experiment_judge",
         _AGENTS_DIR / "experiment_judge.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(JudgeVerdict),
@@ -121,20 +129,23 @@ agents: dict[str, Agent[PipelineDeps, Any]] = {
     ),
     # Spec 7 — exploration breadth (only used when
     # config.exploration_breadth_enabled=True)
-    "experiment_designer_bundle": Agent.from_file(
+    "experiment_designer_bundle": build_agent(
+        "experiment_designer_bundle",
         _AGENTS_DIR / "experiment_designer_bundle.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(DesignBundle),
         capabilities=[throttle_hooks],
         tools=[web_search_exa, web_fetch_exa],
     ),
-    "design_scorer": Agent.from_file(
+    "design_scorer": build_agent(
+        "design_scorer",
         _AGENTS_DIR / "design_scorer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(DesignScore),
         capabilities=[throttle_hooks],
     ),
-    "design_comparator": Agent.from_file(
+    "design_comparator": build_agent(
+        "design_comparator",
         _AGENTS_DIR / "design_comparator.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(DesignComparison),
@@ -146,7 +157,8 @@ agents: dict[str, Agent[PipelineDeps, Any]] = {
     # dataset metadata; the workspace template ships a canonical
     # @asset chain (pipeline.assets.experiment.canonical) that runs
     # those choices. No agent codegen, no codegen-class failures.
-    "config_writer": Agent.from_file(
+    "config_writer": build_agent(
+        "config_writer",
         _AGENTS_DIR / "config_writer.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(ExperimentSpec),

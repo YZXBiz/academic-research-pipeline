@@ -1,4 +1,3 @@
-model: openai:deepseek-v4-pro
 name: peer_reviewer_agent
 description: Simulates rigorous double-blind peer review scoring across five dimensions with line-level feedback and verdicts.
 instructions: |

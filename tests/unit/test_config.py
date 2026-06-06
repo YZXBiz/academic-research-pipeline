@@ -8,10 +8,10 @@ from academic_pipeline.config import PipelineConfig
 
 
 class TestConfigValidators:
-    def test_empty_model_name_raises(self):
-        """Model_name validator rejects empty/whitespace strings (line 100)."""
-        with pytest.raises(ValueError, match="model_name cannot be empty"):
-            PipelineConfig(model_name="   ")
+    def test_empty_default_model_raises(self):
+        """default_model validator rejects empty/whitespace strings."""
+        with pytest.raises(ValueError, match="default_model cannot be empty"):
+            PipelineConfig(default_model="   ")
 
     def test_postgres_without_database_url_raises(self):
         """Postgres backend without database_url raises (lines 107, 129-132)."""
@@ -28,9 +28,9 @@ class TestConfigValidators:
 
 
 def test_evaluator_config_defaults():
-    config = PipelineConfig(anthropic_api_key="sk-test")
+    config = PipelineConfig()
     assert config.evaluator_models == [
-        "anthropic:claude-opus-4-7",
+        "openai:deepseek-v4-pro",
     ]
     assert config.max_node_iterations == 2
     assert config.node_quality_threshold == 7.0

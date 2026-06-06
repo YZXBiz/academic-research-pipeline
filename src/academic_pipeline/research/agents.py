@@ -28,6 +28,7 @@ from academic_pipeline.models.research import (
 )
 from academic_pipeline.models.review import EditorReview
 from academic_pipeline.research.synthesis_validator import validate_synthesis_report
+from academic_pipeline.runtime.model_registry import build_agent
 from academic_pipeline.runtime.throttle import throttle_hooks
 from academic_pipeline.tools.bibliography.doi import (
     check_retraction,
@@ -48,26 +49,30 @@ _COMPACTION = AnthropicCompaction(token_threshold=DEFAULT_CONFIG.compaction_toke
 _AGENTS_DIR = Path(__file__).parent / "specs"
 
 agents: dict[str, Agent[PipelineDeps, Any]] = {
-    "research_question": Agent.from_file(
+    "research_question": build_agent(
+        "research_question",
         _AGENTS_DIR / "research_question.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(RQBrief),
         capabilities=[throttle_hooks],
     ),
-    "research_architect": Agent.from_file(
+    "research_architect": build_agent(
+        "research_architect",
         _AGENTS_DIR / "research_architect.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(MethodologyBlueprint),
         capabilities=[throttle_hooks],
     ),
-    "bibliography": Agent.from_file(
+    "bibliography": build_agent(
+        "bibliography",
         _AGENTS_DIR / "bibliography.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(Bibliography),
         capabilities=[throttle_hooks, SkillsCapability(directories=SKILLS_DIRS), _COMPACTION],  # pyright: ignore[reportArgumentType]
         tools=[web_search_exa, web_fetch_exa],
     ),
-    "source_verification": Agent.from_file(
+    "source_verification": build_agent(
+        "source_verification",
         _AGENTS_DIR / "source_verification.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(SourceVerificationReport),
@@ -82,37 +87,43 @@ agents: dict[str, Agent[PipelineDeps, Any]] = {
         ],
     ),
     # PRD §6.1.T7 — knowledge_graph agent + spec deleted (legacy KG retired).
-    "chain_of_ideas_extractor": Agent.from_file(
+    "chain_of_ideas_extractor": build_agent(
+        "chain_of_ideas_extractor",
         _AGENTS_DIR / "chain_of_ideas_extractor.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(DevelopmentChain),
         capabilities=[throttle_hooks],
     ),
-    "thesis_extractor": Agent.from_file(
+    "thesis_extractor": build_agent(
+        "thesis_extractor",
         _AGENTS_DIR / "thesis_extractor.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(ThesisStatement),
         capabilities=[throttle_hooks],
     ),
-    "synthesis": Agent.from_file(
+    "synthesis": build_agent(
+        "synthesis",
         _AGENTS_DIR / "synthesis.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(SynthesisReport),
         capabilities=[throttle_hooks, _COMPACTION],  # pyright: ignore[reportArgumentType]
     ),
-    "report_compiler": Agent.from_file(
+    "report_compiler": build_agent(
+        "report_compiler",
         _AGENTS_DIR / "report_compiler.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(ResearchReport),
         capabilities=[throttle_hooks, _COMPACTION],  # pyright: ignore[reportArgumentType]
     ),
-    "independent_verifier": Agent.from_file(
+    "independent_verifier": build_agent(
+        "independent_verifier",
         _AGENTS_DIR / "independent_verifier.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(IndependentVerificationReport),
         capabilities=[throttle_hooks],
     ),
-    "editor_in_chief": Agent.from_file(
+    "editor_in_chief": build_agent(
+        "editor_in_chief",
         _AGENTS_DIR / "editor_in_chief.yaml",
         deps_type=PipelineDeps,
         output_type=PromptedOutput(EditorReview),
