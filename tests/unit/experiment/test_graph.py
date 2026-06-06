@@ -5,8 +5,6 @@ from __future__ import annotations
 from academic_pipeline.experiment.graph import (
     AnalysisNode,
     ExperimentDesignNode,
-    InteractiveMLNode,
-    JudgeNode,
     build_experiment_graph,
 )
 
@@ -15,10 +13,7 @@ def test_build_experiment_graph():
     graph = build_experiment_graph()
     assert graph.name == "experiment"
 
+
 def test_node_classes_exist():
     assert ExperimentDesignNode is not None
-    assert InteractiveMLNode is not None
-    assert JudgeNode is not None
     assert AnalysisNode is not None
-
-

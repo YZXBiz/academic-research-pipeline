@@ -89,8 +89,6 @@ def _make_results() -> ExperimentResults:
 
 def _make_deps(*, breadth: bool, n: int = 4, k: int = 2) -> PipelineDeps:
     config = PipelineConfig(
-        anthropic_api_key="sk-test-fake-key",  # type: ignore[arg-type]
-        model_name="test",
         tool_call_delay_seconds=0,
         exploration_breadth_enabled=breadth,
         n_design_alternatives=n,
@@ -386,8 +384,6 @@ def test_build_experiment_graph_includes_new_nodes() -> None:
         "ExperimentDesignNode",
         "ExperimentDesignBundleNode",
         "DesignSelectionNode",
-        "InteractiveMLNode",
-        "JudgeNode",
         "AnalysisNode",
         "DesignComparisonNode",
     ):

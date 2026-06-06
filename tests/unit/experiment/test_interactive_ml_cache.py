@@ -1,4 +1,4 @@
-"""Tests for AgentMessageCache integration in InteractiveMLNode."""
+"""Tests for AgentMessageCache + traced_agent_run message-history forwarding."""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
