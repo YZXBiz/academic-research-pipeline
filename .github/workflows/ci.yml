@@ -17,7 +17,7 @@ jobs:
     # Pure stdlib (re, sys, tomllib, pathlib) — no `uv sync` needed.
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v4
         with:
           python-version: "3.12"
@@ -32,7 +32,7 @@ jobs:
     # so PR authors can `git apply` the suggested fix locally.
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v4
         with:
           python-version: "3.12"
@@ -43,7 +43,7 @@ jobs:
   lint:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v4
         with:
           python-version: "3.12"
@@ -56,7 +56,7 @@ jobs:
   typecheck:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v4
         with:
           python-version: "3.12"
@@ -76,7 +76,7 @@ jobs:
       matrix:
         python-version: ["3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -97,7 +97,7 @@ jobs:
     needs: [lint, typecheck]
     if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v4
         with:
           python-version: "3.12"
@@ -111,7 +111,7 @@ jobs:
   security:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v4
         with:
           python-version: "3.12"
@@ -132,7 +132,7 @@ jobs:
   #   runs-on: self-hosted
   #   needs: test
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@v7
   #     - uses: docker/setup-buildx-action@v3
   #     - uses: docker/build-push-action@v6
   #       with:
